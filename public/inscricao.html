@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisão de Vidas — Sara Itapema</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="shortcut icon" href="logoSara.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --accent:       #1a8fc4;
+            --accent-light: #38bdf8;
+            --accent-mid:   #0e7ab0;
+            --accent-dark:  #0a5a84;
+            --glow:         rgba(26,143,196,0.16);
+            --deep:         #03070e;
+            --dark:         #070d18;
+            --surface:      rgba(255,255,255,0.032);
+            --border:       rgba(26,143,196,0.13);
+            --border-soft:  rgba(255,255,255,0.065);
+            --text:         #c8dff0;
+            --muted:        #3e6880;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',sans-serif;background:var(--deep);color:var(--text);overflow-x:hidden}
+        ::-webkit-scrollbar{width:5px}
+        ::-webkit-scrollbar-track{background:var(--deep)}
+        ::-webkit-scrollbar-thumb{background:var(--accent-dark);border-radius:3px}
+
+        /* CANVAS */
+        #cv{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55}
+
+        /* HERO */
+        .hero{
+            position:relative;min-height:100vh;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            text-align:center;padding:2rem 1.5rem;overflow:hidden
+        }
+        .hero::before{
+            content:'';position:absolute;inset:0;z-index:1;
+            background:
+                radial-gradient(ellipse 100% 55% at 50% -10%, rgba(26,143,196,.2) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 35% at 90% 95%, rgba(14,122,176,.08) 0%, transparent 55%)
+        }
+        .hero-content{position:relative;z-index:2;max-width:780px}
+
+        .pill{
+            display:inline-flex;align-items:center;gap:8px;
+            background:rgba(26,143,196,.09);border:1px solid rgba(26,143,196,.28);
+            border-radius:100px;padding:6px 18px;
+            font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent-light);
+            margin-bottom:2rem;animation:fadeDown .7s ease both
+        }
+        h1{
+            font-family:'Cinzel',serif;
+            font-size:clamp(2.5rem,6.5vw,5rem);font-weight:700;line-height:1.06;color:#fff;
+            animation:fadeUp .8s ease .1s both
+        }
+        h1 span{
+            background:linear-gradient(135deg,#7dd3fc,#38bdf8,#1a8fc4);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+        }
+        .hero-sub{
+            margin-top:1.1rem;font-size:.98rem;color:var(--muted);font-weight:300;
+            animation:fadeUp .8s ease .2s both
+        }
+        .hero-img{
+            margin:2.5rem auto 0;max-width:680px;border-radius:20px;overflow:hidden;
+            border:1px solid var(--border);
+            box-shadow:0 0 0 1px rgba(26,143,196,.07),0 40px 80px rgba(0,0,0,.75),0 0 80px rgba(26,143,196,.07);
+            animation:fadeUp .9s ease .3s both
+        }
+        .hero-img img{width:100%;display:block}
+        .hero-img-ph{
+            height:210px;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;gap:10px;
+            background:linear-gradient(135deg,#08101e,#040b15);
+            color:var(--muted);font-size:.82rem
+        }
+        .scroll-cue{
+            position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:2;
+            display:flex;flex-direction:column;align-items:center;gap:6px;
+            color:var(--muted);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;
+            animation:float 2.5s ease-in-out infinite
+        }
+
+        /* LAYOUT */
+        section{position:relative;z-index:1}
+        .container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+        .sec-head{text-align:center;margin-bottom:2.8rem}
+        .sec-lbl{
+            display:inline-flex;align-items:center;gap:10px;
+            font-size:.67rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);
+            margin-bottom:.65rem
+        }
+        .sec-lbl::before,.sec-lbl::after{content:'';width:22px;height:1px;background:var(--accent);opacity:.4}
+        .sec-title{font-family:'Cinzel',serif;font-size:clamp(1.5rem,3.5vw,2.4rem);color:#fff;font-weight:600}
+
+        /* INFO CARDS */
+        .info-sec{padding:5.5rem 1.5rem}
+        .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:1.25rem}
+
+        .icard{
+            background:var(--surface);border:1px solid var(--border-soft);
+            border-radius:18px;padding:1.8rem;
+            position:relative;overflow:hidden;
+            transition:transform .3s,border-color .3s,box-shadow .3s
+        }
+        .icard::after{
+            content:'';position:absolute;top:0;left:0;right:0;height:1px;
+            background:linear-gradient(90deg,transparent,var(--accent),transparent);
+            opacity:0;transition:opacity .3s
+        }
+        .icard:hover{transform:translateY(-6px);border-color:rgba(26,143,196,.25);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 30px rgba(26,143,196,.07)}
+        .icard:hover::after{opacity:1}
+
+        .icard-icon{
+            width:46px;height:46px;border-radius:12px;
+            background:rgba(26,143,196,.09);border:1px solid rgba(26,143,196,.18);
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.1rem;color:var(--accent-light);margin-bottom:1.2rem
+        }
+        .icard-lbl{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem}
+        .icard-val{font-size:1rem;color:#fff;font-weight:500}
+        .icard-sub{font-size:.77rem;color:var(--muted);margin-top:.3rem}
+        .price-row{display:flex;align-items:baseline;gap:7px;margin-top:.5rem}
+        .price-n{font-size:1.6rem;font-weight:700;color:#4ade80}
+        .price-lbl{font-size:.77rem;color:var(--muted)}
+        .hdiv{height:1px;background:var(--border-soft);margin:.9rem 0}
+
+        /* GALLERY */
+        .gallery-sec{padding:5rem 0;text-align:center}
+        .gallery-sec .sec-head{padding:0 1.5rem}
+        .gallery-wrap{overflow:hidden;margin-top:2.8rem;position:relative}
+        .gallery-wrap::before,.gallery-wrap::after{
+            content:'';position:absolute;top:0;bottom:0;z-index:2;width:110px
+        }
+        .gallery-wrap::before{left:0;background:linear-gradient(to right,var(--deep),transparent)}
+        .gallery-wrap::after{right:0;background:linear-gradient(to left,var(--deep),transparent)}
+        .gallery-track{
+            display:flex;gap:1rem;width:max-content;
+            animation:gscroll 38s linear infinite
+        }
+        .gallery-track:hover{animation-play-state:paused}
+        @keyframes gscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        .gitem{
+            width:278px;height:198px;flex-shrink:0;border-radius:14px;overflow:hidden;
+            border:1px solid var(--border);position:relative;cursor:pointer
+        }
+        .gitem img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+        .gitem:hover img{transform:scale(1.07)}
+        .gph{
+            width:100%;height:100%;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;gap:8px;
+            background:linear-gradient(135deg,#070f1d,#040a14);
+            color:var(--muted);font-size:.76rem
+        }
+
+        /* WHATSAPP */
+        .wa-sec{padding:3rem 1.5rem 5rem;max-width:660px;margin:0 auto;text-align:center}
+        .wa-card{
+            background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(22,163,74,.03));
+            border:1px solid rgba(34,197,94,.17);border-radius:20px;padding:2.5rem
+        }
+        .wa-icon{
+            width:52px;height:52px;border-radius:50%;
+            background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.4rem;color:#22c55e;margin:0 auto 1.2rem
+        }
+        .wa-btn{
+            display:inline-flex;align-items:center;gap:9px;
+            background:#22c55e;color:#fff;font-weight:600;
+            padding:13px 28px;border-radius:100px;text-decoration:none;
+            font-size:.93rem;margin-top:1.5rem;
+            transition:all .3s;box-shadow:0 8px 24px rgba(34,197,94,.25)
+        }
+        .wa-btn:hover{background:#16a34a;transform:translateY(-2px);box-shadow:0 12px 30px rgba(34,197,94,.35)}
+
+        /* FORM */
+        .form-sec{padding:5rem 1.5rem 7rem}
+        .fwrap{
+            max-width:760px;margin:0 auto;
+            background:var(--surface);border:1px solid var(--border-soft);
+            border-radius:24px;padding:3rem 2.5rem;
+            position:relative;overflow:hidden
+        }
+        .fwrap::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:2px;
+            background:linear-gradient(90deg,transparent,var(--accent-mid),var(--accent-light),var(--accent-mid),transparent)
+        }
+        .ftitle{font-family:'Cinzel',serif;font-size:clamp(1.25rem,2.8vw,1.85rem);color:#fff;text-align:center;margin-bottom:.4rem}
+        .fsub{text-align:center;color:var(--muted);font-size:.86rem;margin-bottom:2.5rem}
+
+        .fg{margin-bottom:1.4rem}
+        .frow2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+        @media(max-width:520px){.frow2{grid-template-columns:1fr}}
+
+        .flbl{
+            display:flex;align-items:center;gap:7px;
+            font-size:.73rem;font-weight:500;letter-spacing:.05em;
+            color:var(--accent-light);margin-bottom:.5rem
+        }
+        .flbl i{font-size:.72rem;opacity:.65}
+
+        .fi,.fsel,.fta{
+            width:100%;padding:12px 15px;
+            background:rgba(255,255,255,.032);
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:10px;color:#d8ecf8;
+            font-family:'Inter',sans-serif;font-size:.89rem;
+            outline:none;transition:border-color .2s,box-shadow .2s,background .2s
+        }
+        .fi::placeholder,.fta::placeholder{color:#1e3a50}
+        .fi:focus,.fsel:focus,.fta:focus{
+            border-color:var(--accent);
+            box-shadow:0 0 0 3px rgba(26,143,196,.11);
+            background:rgba(26,143,196,.04)
+        }
+        .fi.inv,.fsel.inv,.fta.inv{border-color:#f87171}
+        .fsel{
+            appearance:none;cursor:pointer;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%233e6880' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;background-position:right 13px center;padding-right:35px
+        }
+        .fsel option{background:#0c1624;color:#d8ecf8}
+        .fsel:disabled{opacity:.45;cursor:not-allowed}
+        .eq-loading{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);padding:.5rem 0}
+        .fta{resize:vertical;min-height:76px}
+
+        .rgroup{
+            display:flex;gap:1.5rem;padding:13px 16px;
+            background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.065);border-radius:10px
+        }
+        .rl{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text);font-size:.89rem}
+        .rl i{font-size:.78rem;color:var(--muted)}
+        .rl input[type=radio]{
+            appearance:none;width:17px;height:17px;
+            border:2px solid var(--muted);border-radius:50%;
+            cursor:pointer;transition:border-color .2s;flex-shrink:0
+        }
+        .rl input[type=radio]:checked{
+            border-color:var(--accent-light);
+            background:radial-gradient(circle,var(--accent-light) 38%,transparent 38%)
+        }
+
+        .factions{display:flex;gap:.9rem;margin-top:2.5rem;flex-wrap:wrap}
+        .btn-sub{
+            flex:1;min-width:190px;padding:14px 26px;
+            background:linear-gradient(135deg,var(--accent-dark),var(--accent),var(--accent-light));
+            background-size:200% auto;border:none;border-radius:100px;
+            color:#fff;font-weight:700;font-family:'Inter',sans-serif;
+            font-size:.92rem;letter-spacing:.04em;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            transition:all .4s
+        }
+        .btn-sub:hover{background-position:right;transform:translateY(-2px);box-shadow:0 10px 30px rgba(26,143,196,.3)}
+        .btn-sub:disabled{opacity:.55;cursor:not-allowed;transform:none}
+        .btn-rst{
+            padding:14px 22px;background:transparent;
+            border:1px solid rgba(255,255,255,.09);border-radius:100px;
+            color:var(--muted);font-family:'Inter',sans-serif;font-size:.87rem;cursor:pointer;
+            transition:all .25s;display:flex;align-items:center;gap:7px
+        }
+        .btn-rst:hover{border-color:rgba(255,255,255,.2);color:#fff}
+
+        /* FOOTER */
+        footer{border-top:1px solid rgba(255,255,255,.05);padding:3rem 1.5rem;text-align:center}
+        .f-name{font-family:'Cinzel',serif;font-size:.95rem;color:var(--accent-light)}
+        .f-sub{font-size:.74rem;color:var(--muted);margin:.3rem 0 1.5rem}
+        .socials{display:flex;justify-content:center;gap:.85rem}
+        .soc{
+            width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.08);
+            display:flex;align-items:center;justify-content:center;
+            color:var(--muted);text-decoration:none;transition:all .25s;font-size:.86rem
+        }
+        .soc:hover{border-color:var(--accent);color:var(--accent-light);transform:translateY(-3px)}
+
+        /* MODAL */
+        .modal-ov{
+            position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);
+            display:flex;align-items:center;justify-content:center;z-index:100;padding:1.5rem;
+            opacity:0;pointer-events:none;transition:opacity .3s
+        }
+        .modal-ov.open{opacity:1;pointer-events:all}
+        .modal-box{
+            background:#08111f;border:1px solid rgba(26,143,196,.2);
+            border-radius:24px;padding:2.5rem;max-width:430px;width:100%;text-align:center;
+            transform:scale(.9);transition:transform .3s;position:relative;overflow:hidden
+        }
+        .modal-box::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:2px;
+            background:linear-gradient(90deg,transparent,var(--accent),var(--accent-light),var(--accent),transparent)
+        }
+        .modal-ov.open .modal-box{transform:scale(1)}
+        .m-icon{
+            width:60px;height:60px;border-radius:50%;
+            background:rgba(26,143,196,.1);border:1px solid rgba(26,143,196,.28);
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto 1.4rem;font-size:1.5rem;color:var(--accent-light)
+        }
+        .m-title{font-family:'Cinzel',serif;font-size:1.35rem;color:#fff;margin-bottom:.65rem}
+        .m-text{color:var(--muted);font-size:.86rem;line-height:1.65;margin-bottom:1.8rem}
+        .pix-box{
+            background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.07);
+            border-radius:12px;padding:1.1rem;margin-bottom:1.3rem
+        }
+        .pix-lbl{font-size:.7rem;color:var(--muted);margin-bottom:.45rem;display:flex;align-items:center;gap:5px}
+        .pix-row{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.4);border-radius:8px;padding:9px 13px}
+        .pix-key{flex:1;font-size:1.05rem;font-weight:700;color:var(--accent-light);letter-spacing:.04em}
+        .btn-copy{
+            background:rgba(26,143,196,.12);border:1px solid rgba(26,143,196,.24);
+            border-radius:6px;color:var(--accent-light);padding:6px 10px;
+            cursor:pointer;font-size:.76rem;transition:background .2s;
+            display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif
+        }
+        .btn-copy:hover{background:rgba(26,143,196,.22)}
+        .price-pills{display:flex;gap:.85rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+        .ppill{
+            background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.17);
+            border-radius:10px;padding:.7rem 1rem;font-size:.77rem;color:var(--muted)
+        }
+        .ppill strong{display:block;font-size:1.15rem;color:#4ade80}
+        .btn-close{
+            width:100%;padding:13px;
+            background:linear-gradient(135deg,var(--accent-dark),var(--accent));
+            border:none;border-radius:100px;color:#fff;font-weight:700;
+            font-family:'Inter',sans-serif;font-size:.92rem;cursor:pointer;transition:all .25s
+        }
+        .btn-close:hover{opacity:.88;transform:translateY(-1px)}
+
+        /* DIVIDER */
+        .div{max-width:960px;margin:0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(26,143,196,.14),transparent)}
+
+        /* REVEAL */
+        .reveal{opacity:0;transform:translateY(26px);transition:opacity .75s,transform .75s}
+        .reveal.on{opacity:1;transform:none}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+        @keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+        @keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-7px)}}
+
+        @media(max-width:600px){
+            .fwrap{padding:2rem 1.2rem}
+            .factions{flex-direction:column}
+            .btn-sub,.btn-rst{width:100%;justify-content:center}
+        }
+    </style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<!-- HERO -->
+<header class="hero">
+    <div class="hero-content">
+        <div class="pill">
+            <i class="fas fa-droplet" style="font-size:.6rem"></i>
+            Sara Itapema &mdash; Ano do Refrigério
+        </div>
+        <h1>Revisão<br>de <span>Vidas 2026</span></h1>
+        <p class="hero-sub">3 dias que vão transformar sua história para sempre</p>
+        <div class="hero-img">
+            <img src="revisaoGeral.jpeg" alt="Revisão de Vidas"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            
+        </div>
+    </div>
+    <div class="scroll-cue">
+        <span>Role para baixo</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+</header>
+
+<!-- INFO CARDS -->
+<section class="info-sec reveal">
+    <div class="container">
+        <div class="sec-head">
+            <div class="sec-lbl"><span>Detalhes do Evento</span></div>
+            <h2 class="sec-title">Tudo que você precisa saber</h2>
+        </div>
+        <div class="info-grid">
+            <div class="icard">
+                <div class="icard-icon"><i class="fas fa-calendar-days"></i></div>
+                <div class="icard-lbl">Datas</div>
+                <div class="icard-val">27, 28 e 29 de Março</div>
+                <div class="icard-sub">3 dias de imersão espiritual</div>
+            </div>
+            <div class="icard">
+                <div class="icard-icon"><i class="fas fa-location-dot"></i></div>
+                <div class="icard-lbl">Local</div>
+                <div class="icard-val">Chácara Nova Canaã</div>
+                <div class="icard-sub">Ambiente preparado especialmente para você</div>
+            </div>
+            <div class="icard">
+                <div class="icard-icon"><i class="fas fa-wallet"></i></div>
+                <div class="icard-lbl">Investimento</div>
+                <div class="price-row"><span class="price-n">R$ 320</span><span class="price-lbl">com transporte</span></div>
+                <div class="icard-sub">Hospedagem + alimentação inclusos</div>
+                <div class="hdiv"></div>
+                <div class="price-row"><span class="price-n">R$ 300</span><span class="price-lbl">sem transporte</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="div"></div>
+
+<!-- GALERIA -->
+<section class="gallery-sec reveal">
+    <div class="sec-head">
+        <div class="sec-lbl"><span>Memórias</span></div>
+        <h2 class="sec-title">Últimos Retiros</h2>
+        <p style="color:var(--muted);margin-top:.65rem;font-size:.87rem">Momentos que ficaram para sempre em nossos corações</p>
+    </div>
+    <div class="gallery-wrap">
+        <div class="gallery-track">
+            <div class="gitem"><img src="image1.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image2.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image3.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image4.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image5.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image6.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image1.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image2.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image3.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image4.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image5.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image6.png" alt="Revisão de Vidas" loading="lazy"></div>
+        </div>
+    </div>
+    
+</section>
+
+<div class="div"></div>
+
+<!-- WHATSAPP -->
+<section class="wa-sec reveal">
+    <div class="wa-card">
+        <div class="wa-icon"><i class="fab fa-whatsapp"></i></div>
+        <h3 style="font-family:'Cinzel',serif;font-size:1.15rem;color:#fff;margin-bottom:.6rem">Grupo Oficial</h3>
+        <p style="color:var(--muted);font-size:.87rem">Receba todas as informações importantes sobre o retiro em primeira mão.</p>
+        <a href="https://chat.whatsapp.com/HPb6hdxMk7i0yRl8UzLJ7v" target="_blank" rel="noopener" class="wa-btn">
+            <i class="fab fa-whatsapp"></i> Entrar no Grupo
+        </a>
+    </div>
+</section>
+
+<!-- FORMULÁRIO -->
+<section class="form-sec reveal" id="formulario">
+    <div class="fwrap">
+        <h2 class="ftitle">Formulário de Inscrição</h2>
+        <p class="fsub">Preencha seus dados para garantir sua vaga no Revisão de Vidas</p>
+
+        <form id="regForm">
+            <div class="fg">
+                <label class="flbl"><i class="fas fa-user"></i> Nome completo <span style="color:#f87171;margin-left:2px">*</span></label>
+                <input type="text" name="nome_completo" required class="fi" placeholder="Seu nome completo">
+            </div>
+            <div class="frow2">
+                <div class="fg">
+                    <label class="flbl"><i class="fas fa-id-card"></i> CPF <span style="color:#f87171;margin-left:2px">*</span></label>
+                    <input type="tel" name="cpf" required pattern="[0-9]{11}" minlength="11" maxlength="11" inputmode="numeric" class="fi" placeholder="Somente números">
+                </div>
+                <div class="fg">
+                    <label class="flbl"><i class="fas fa-cake-candles"></i> Data de nascimento <span style="color:#f87171;margin-left:2px">*</span></label>
+                    <input type="text" name="data_nascimento" required placeholder="DD/MM/AAAA" maxlength="10" oninput="maskDate(this)" class="fi">
+                </div>
+            </div>
+            <div class="fg">
+                <label class="flbl"><i class="fas fa-house"></i> Endereço completo <span style="color:#f87171;margin-left:2px">*</span></label>
+                <input type="text" name="endereco" required class="fi" placeholder="Rua, número, bairro, cidade">
+            </div>
+            <div class="fg">
+                <label class="flbl"><i class="fas fa-venus-mars"></i> Sexo <span style="color:#f87171;margin-left:2px">*</span></label>
+                <div class="rgroup">
+                    <label class="rl"><input type="radio" name="sexo" value="Masculino" required><i class="fas fa-mars"></i> Masculino</label>
+                    <label class="rl"><input type="radio" name="sexo" value="Feminino"><i class="fas fa-venus"></i> Feminino</label>
+                </div>
+            </div>
+            <div class="fg">
+                    <label class="flbl"><i class="fab fa-whatsapp"></i> WhatsApp <span style="color:#f87171;margin-left:2px">*</span></label>
+                    <input type="tel" name="telefone" required class="fi" placeholder="(XX) XXXXX-XXXX">
+                </div>
+
+            <!-- EQUIPE + CÉLULA DINÂMICOS -->
+            <div class="frow2">
+                <div class="fg">
+                    <label class="flbl"><i class="fas fa-people-group"></i> Equipe <span style="color:#f87171;margin-left:2px">*</span></label>
+                    <select name="equipe_id" id="selEquipe" required class="fsel" onchange="onEquipeChange()">
+                        <option value="" disabled selected>Carregando equipes...</option>
+                    </select>
+                </div>
+                <div class="fg">
+                    <label class="flbl"><i class="fas fa-users"></i> Célula <span style="color:#f87171;margin-left:2px">*</span></label>
+                    <select name="celula_id" id="selCelula" required class="fsel" disabled>
+                        <option value="" disabled selected>Selecione a equipe primeiro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg" id="fgLider" style="display:none">
+                <label class="flbl"><i class="fas fa-user-tie"></i> Líder da célula</label>
+                <input type="text" id="inpLider" name="lider_ou_convite" class="fi" readonly
+                       placeholder="Preenchido automaticamente" style="background:rgba(26,143,196,.04);color:var(--muted2)">
+            </div>
+            <div class="fg">
+                <label class="flbl"><i class="fas fa-heart-pulse"></i> Condição de saúde <span style="color:var(--muted);font-weight:300;font-size:.68rem">(se houver)</span></label>
+                <textarea name="condicao_saude" class="fta" placeholder="Descreva qualquer condição relevante..."></textarea>
+            </div>
+            <div class="fg">
+                <label class="flbl"><i class="fas fa-utensils"></i> Restrição alimentar <span style="color:var(--muted);font-weight:300;font-size:.68rem">(se houver)</span></label>
+                <textarea name="restricao_alimentar" class="fta" placeholder="Alergias ou restrições alimentares..."></textarea>
+            </div>
+            <div class="fg">
+                <label class="flbl"><i class="fas fa-child"></i> Filhos <span style="color:var(--muted);font-weight:300;font-size:.68rem">(Nome e Idade)</span></label>
+                <textarea name="informacao_filho" class="fta" placeholder="Nome e idade de cada filho..."></textarea>
+            </div>
+            <div class="fg">
+                <label class="flbl"><i class="fas fa-phone-volume"></i> 3 Contatos de emergência <span style="color:#f87171;margin-left:2px">*</span></label>
+                <textarea name="contatos_emergencia" required class="fta" placeholder="Nome + Telefone de 3 contatos de emergência..."></textarea>
+            </div>
+            <div class="fg">
+                <label class="flbl"><i class="fas fa-star"></i> Sua expectativa para o Revisão <span style="color:#f87171;margin-left:2px">*</span></label>
+                <textarea name="expectativa" required class="fta" placeholder="O que você espera viver nesse retiro?"></textarea>
+            </div>
+            <div class="fg">
+                <label class="flbl"><i class="fab fa-whatsapp"></i> Entrou no grupo do WhatsApp? <span style="color:#f87171;margin-left:2px">*</span></label>
+                <div class="rgroup">
+                    <label class="rl"><input type="radio" name="entrou_grupo_whatsapp" value="Sim" required><i class="fas fa-check" style="color:#4ade80"></i> Sim</label>
+                    <label class="rl"><input type="radio" name="entrou_grupo_whatsapp" value="Não"><i class="fas fa-xmark" style="color:#f87171"></i> Não</label>
+                </div>
+            </div>
+            <div class="factions">
+                <button type="submit" id="btnSub" class="btn-sub">
+                    <i class="fas fa-paper-plane" id="subIcon"></i>
+                    <span id="subTxt">CONFIRMAR PRESENÇA</span>
+                </button>
+                <button type="reset" class="btn-rst">
+                    <i class="fas fa-rotate-left"></i> Limpar
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="f-name">Sara Itapema</div>
+    <div class="f-sub">Ano do Refrigério — 2026</div>
+    <div class="socials">
+        <a href="#" class="soc"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="soc"><i class="fab fa-instagram"></i></a>
+        <a href="https://chat.whatsapp.com/HPb6hdxMk7i0yRl8UzLJ7v" target="_blank" class="soc" style="border-color:rgba(34,197,94,.22);color:#22c55e"><i class="fab fa-whatsapp"></i></a>
+    </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal">
+    <div class="modal-box">
+        <div class="m-icon"><i class="fas fa-check"></i></div>
+        <h3 class="m-title">Inscrição Enviada!</h3>
+        <p class="m-text">Sua inscrição foi recebida com sucesso.<br>Efetue o pagamento via Pix para confirmar sua vaga.</p>
+        <div class="pix-box">
+            <div class="pix-lbl"><i class="fas fa-qrcode"></i> Chave Pix</div>
+            <div class="pix-row">
+                <span class="pix-key">47997801177</span>
+                <button class="btn-copy" id="copyBtn" onclick="copyPix()"><i class="fas fa-copy"></i> Copiar</button>
+            </div>
+        </div>
+        <div class="price-pills">
+            <div class="ppill"><strong>R$ 320</strong>Com transporte</div>
+            <div class="ppill"><strong>R$ 300</strong>Sem transporte</div>
+        </div>
+        <button class="btn-close" onclick="closeModal()"><i class="fas fa-check" style="margin-right:7px"></i>Entendido</button>
+    </div>
+</div>
+
+<script>
+// PARTICLES
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+let W=0,H=0,pts=[];
+function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+resize();addEventListener('resize',resize);
+for(let i=0;i<75;i++)pts.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.3,sx:(Math.random()-.5)*.22,sy:-(Math.random()*.38+.07),o:Math.random()*.4+.08,blue:Math.random()>.35});
+(function loop(){
+    cx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+        p.x+=p.sx;p.y+=p.sy;
+        if(p.y<-5){p.y=H+5;p.x=Math.random()*W}
+        cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        cx.fillStyle=p.blue?'#1a8fc4':'#ffffff';cx.globalAlpha=p.o;cx.fill();
+    });
+    cx.globalAlpha=1;requestAnimationFrame(loop);
+})();
+
+// REVEAL
+document.querySelectorAll('.reveal').forEach(el=>{
+    new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('on')})},{threshold:.1}).observe(el)
+});
+
+// ── API BASE ─────────────────────────────────────────────────
+const API_PORT = 3000;
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
+const WEBHOOK_BKP = 'https://webhookb2cms.vaidavenda.com.br/webhook/d80428dd-d02b-45d0-a6d5-dd45fdbfc1e0';
+
+// ── CARREGAR EQUIPES DO BANCO ─────────────────────────────────
+let _equipes = [];
+
+async function carregarEquipes() {
+    const sel = document.getElementById('selEquipe');
+    sel.innerHTML = '<option value="" disabled selected>Carregando...</option>';
+    sel.disabled  = true;
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/equipes`);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const json = await resp.json();
+        if (!json.success) throw new Error(json.error || 'Falha na API');
+
+        _equipes = json.data;
+
+        if (!_equipes.length) {
+            sel.innerHTML = '<option value="" disabled selected>Nenhuma equipe cadastrada</option>';
+            sel.disabled = false;
+            return;
+        }
+
+        sel.innerHTML = '<option value="" disabled selected>Selecione sua equipe</option>';
+        _equipes.forEach(eq => {
+            const opt = document.createElement('option');
+            opt.value = eq.id;
+            opt.textContent = `${eq.name} — ${eq.leader}`;
+            sel.appendChild(opt);
+        });
+        sel.disabled = false;
+
+    } catch(e) {
+        console.error('Erro ao carregar equipes:', e.message);
+        sel.innerHTML = '<option value="" disabled selected>Erro ao carregar — recarregue a página</option>';
+        sel.disabled = false;
+    }
+}
+
+function onEquipeChange() {
+    const eqId   = document.getElementById('selEquipe').value;
+    const selCel = document.getElementById('selCelula');
+    const fgLid  = document.getElementById('fgLider');
+    const inpLid = document.getElementById('inpLider');
+
+    const eq = _equipes.find(e => String(e.id) === String(eqId));
+    if (!eq) return;
+
+    selCel.innerHTML  = '';
+    selCel.disabled   = false;
+    selCel.onchange   = null;
+    fgLid.style.display = 'block';
+
+    if (eq.celulas && eq.celulas.length > 0) {
+        selCel.innerHTML = '<option value="" disabled selected>Selecione sua célula</option>';
+        eq.celulas.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value          = c.id;
+            opt.dataset.lider  = c.lider || '';
+            opt.textContent    = c.lider ? `${c.nome} — ${c.lider}` : c.nome;
+            selCel.appendChild(opt);
+        });
+        inpLid.value = '';
+        selCel.onchange = () => {
+            const opt = selCel.options[selCel.selectedIndex];
+            inpLid.value = opt?.dataset?.lider || eq.leader || '';
+        };
+    } else {
+        // Equipe sem células — célula = equipe inteira
+        selCel.innerHTML = `<option value="0">Célula geral — ${eq.leader}</option>`;
+        selCel.disabled  = true;
+        inpLid.value     = eq.leader || '';
+    }
+}
+
+// Carrega assim que a página abre
+carregarEquipes();
+
+// ── FORM SUBMIT ───────────────────────────────────────────────
+document.getElementById('regForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('btnSub');
+    const ico = document.getElementById('subIcon');
+    const txt = document.getElementById('subTxt');
+    btn.disabled = true; txt.textContent = 'Enviando...'; ico.className = 'fas fa-spinner fa-spin';
+
+    const fd = new FormData(e.target), data = {};
+    fd.forEach((v, k) => data[k] = v || '');
+
+    // Revisão: busca a ativa no banco, fallback por mês
+    try {
+        const cfgResp = await fetch(`${API_BASE}/api/config`);
+        const cfgJson = await cfgResp.json();
+        data.revisao  = (cfgJson.success && cfgJson.data?.valor) ? cfgJson.data.valor : null;
+    } catch(e) { data.revisao = null; }
+    if (!data.revisao) {
+        const m = new Date().getMonth() + 1;
+        data.revisao = m<=3?'RV1':m<=6?'RV2':m<=9?'RV3':'RV4';
+    }
+
+    // Garante que equipe_id e celula_id são números ou null
+    data.equipe_id = data.equipe_id && data.equipe_id !== '0' ? data.equipe_id : null;
+    data.celula_id = data.celula_id && data.celula_id !== '0' ? data.celula_id : null;
+
+    let sucesso = false;
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/inscricao`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(data)
+        });
+        const text = await resp.text();
+        const json = JSON.parse(text);
+        if (json.success) sucesso = true;
+        else throw new Error(json.error || 'Erro desconhecido');
+    } catch(apiErr) {
+        console.warn('API falhou:', apiErr.message);
+        // Fallback local
+        const all = JSON.parse(localStorage.getItem('rv_offline') || '[]');
+        all.push({ ...data, _ts: Date.now() });
+        localStorage.setItem('rv_offline', JSON.stringify(all));
+        sucesso = true; // mostra modal mesmo offline
+    }
+
+    // Webhook de backup (não bloqueia)
+    fetch(WEBHOOK_BKP, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(data)
+    }).catch(() => {});
+
+    btn.disabled = false; txt.textContent = 'CONFIRMAR PRESENÇA'; ico.className = 'fas fa-paper-plane';
+
+    if (sucesso) {
+        e.target.reset();
+        // Resetar selects de equipe/célula
+        document.getElementById('selCelula').innerHTML = '<option value="" disabled selected>Selecione a equipe primeiro</option>';
+        document.getElementById('selCelula').disabled = true;
+        document.getElementById('fgLider').style.display = 'none';
+        document.getElementById('modal').classList.add('open');
+    }
+});
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+function copyPix() {
+    navigator.clipboard.writeText('47997801177').then(() => {
+        const b = document.getElementById('copyBtn');
+        b.innerHTML = '<i class="fas fa-check"></i> Copiado!'; b.style.color = '#4ade80';
+        setTimeout(() => { b.innerHTML = '<i class="fas fa-copy"></i> Copiar'; b.style.color = ''; }, 2200);
+    });
+}
+
+function maskDate(el) {
+    let v = el.value.replace(/\D/g,'');
+    if (v.length > 4) v = v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4,8);
+    else if (v.length > 2) v = v.slice(0,2)+'/'+v.slice(2);
+    el.value = v;
+}
+
+document.querySelectorAll('input[required],textarea[required],select[required]').forEach(i => {
+    i.addEventListener('invalid', () => i.classList.add('inv'));
+    i.addEventListener('input',   () => { if(i.checkValidity()) i.classList.remove('inv'); });
+});
+</script>
+</body>
+</html>
