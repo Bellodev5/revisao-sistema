@@ -4,12 +4,32 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "server.js"
+    },
+    {
+      "src": "/",
+      "dest": "/public/inscricao.html"
+    },
+    {
+      "src": "/painel",
+      "dest": "/public/painel-admin.html"
+    },
+    {
+      "src": "/painel-admin.html",
+      "dest": "/public/painel-admin.html"
+    },
+    {
+      "src": "/inscricao.html",
+      "dest": "/public/inscricao.html"
     },
     {
       "src": "/(.*)",
