@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel — Revisão de Vidas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg:      #03070e;
+            --s1:      #070d18;
+            --s2:      #0a1220;
+            --s3:      #0d1828;
+            --border:  rgba(26,143,196,.12);
+            --border2: rgba(26,143,196,.22);
+            --text:    #c8dff0;
+            --muted:   #3e6880;
+            --muted2:  #5a8fa8;
+            --accent:  #1a8fc4;
+            --accent2: #38bdf8;
+            --green:   #22c55e;
+            --yellow:  #eab308;
+            --red:     #ef4444;
+            --blue:    #3b82f6;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        ::-webkit-scrollbar{width:4px;height:4px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:#0c4a6e;border-radius:2px}
+
+        /* ── LOGIN ── */
+        #loginPage{
+            min-height:100vh;display:flex;align-items:center;justify-content:center;
+            padding:1.5rem;
+            background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(26,143,196,.12),transparent)
+        }
+        .login-card{
+            background:var(--s1);border:1px solid var(--border);
+            border-radius:20px;padding:2.8rem 2.5rem;
+            width:100%;max-width:400px;
+            animation:fadeUp .5s ease both
+        }
+        .login-logo{text-align:center;margin-bottom:2rem}
+        .login-ico{
+            width:56px;height:56px;border-radius:14px;
+            background:rgba(26,143,196,.1);border:1px solid rgba(26,143,196,.25);
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto .9rem;font-size:1.3rem;color:#38bdf8
+        }
+        .login-title{font-size:1.2rem;font-weight:600;color:#fff}
+        .login-sub{font-size:.8rem;color:var(--muted);margin-top:.25rem}
+
+        .fld{margin-bottom:1.1rem}
+        .fld label{display:flex;align-items:center;gap:6px;font-size:.73rem;font-weight:500;color:var(--muted2);margin-bottom:.4rem}
+        .fld input{
+            width:100%;padding:11px 14px;
+            background:var(--s3);border:1px solid var(--border);
+            border-radius:9px;color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;outline:none;
+            transition:border-color .2s,box-shadow .2s
+        }
+        .fld input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,143,196,.15)}
+        .btn-login{
+            width:100%;padding:12px;
+            background:linear-gradient(135deg,#0a5a84,#1a8fc4,#38bdf8);background-size:200% auto;border:none;border-radius:9px;
+            color:#fff;font-weight:600;font-family:'Inter',sans-serif;
+            font-size:.92rem;cursor:pointer;transition:all .2s;margin-top:.3rem;
+            display:flex;align-items:center;justify-content:center;gap:7px
+        }
+        .btn-login:hover{background-position:right;transform:translateY(-1px)}
+        .login-err{
+            background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);
+            border-radius:8px;padding:9px 13px;font-size:.81rem;color:var(--red);
+            margin-top:.9rem;display:none;align-items:center;gap:7px
+        }
+
+        /* ── APP ── */
+        #appPage{display:none}
+
+        /* ── SIDEBAR ── */
+        .layout{display:flex;min-height:100vh}
+        .sidebar{
+            width:230px;background:var(--s1);border-right:1px solid var(--border);
+            display:flex;flex-direction:column;flex-shrink:0;
+            position:fixed;top:0;left:0;bottom:0;z-index:50;
+            transition:transform .3s ease
+        }
+        .sb-head{padding:1rem 1.2rem;border-bottom:1px solid var(--border);position:relative}
+        .sb-head::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(26,143,196,.4),transparent)}
+        .sb-logo-wrap{
+            width:100%;height:50px;display:flex;align-items:center;justify-content:center;
+            margin-bottom:.6rem;
+        }
+        .sb-logo-wrap img{max-height:46px;max-width:160px;object-fit:contain;filter:brightness(1.1)}
+        .sb-logo-fallback{
+            width:100%;height:46px;border-radius:8px;
+            border:1px dashed var(--border2);
+            display:flex;align-items:center;justify-content:center;
+            gap:6px;color:var(--muted);font-size:.68rem;cursor:pointer;
+            transition:border-color .2s;text-decoration:none;
+        }
+        .sb-logo-fallback:hover{border-color:var(--accent);color:var(--accent2)}
+        .sb-name{font-size:.82rem;font-weight:600;color:#fff;line-height:1.2;text-align:center}
+        .sb-sub{font-size:.63rem;color:var(--muted);text-align:center}
+
+        .sb-nav{flex:1;padding:.75rem .6rem;overflow-y:auto}
+        .nav-sec-lbl{
+            font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+            color:var(--muted);padding:0 .6rem;margin:.9rem 0 .35rem
+        }
+        .nav-item{
+            display:flex;align-items:center;gap:9px;
+            padding:9px 11px;border-radius:7px;
+            color:var(--muted);cursor:pointer;transition:all .18s;
+            font-size:.85rem;margin-bottom:1px
+        }
+        .nav-item:hover{background:rgba(26,143,196,.07);color:var(--text)}
+        .nav-item.active{background:rgba(26,143,196,.12);color:var(--accent2)}
+        .nav-item .ni{width:16px;text-align:center;font-size:.82rem;flex-shrink:0}
+        .nav-badge{
+            margin-left:auto;background:var(--accent);color:#fff;
+            font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px
+        }
+
+        .sb-foot{padding:.75rem .6rem;border-top:1px solid var(--border)}
+        .user-row{
+            display:flex;align-items:center;gap:9px;padding:9px 11px;
+            border-radius:7px;background:var(--s2)
+        }
+        .uav{
+            width:30px;height:30px;border-radius:50%;background:var(--accent);
+            display:flex;align-items:center;justify-content:center;
+            font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0
+        }
+        .uname{font-size:.8rem;font-weight:500;color:var(--text)}
+        .urole{font-size:.68rem;color:var(--muted)}
+        .btn-logout{
+            margin-left:auto;background:none;border:none;
+            color:var(--muted);cursor:pointer;font-size:.82rem;padding:4px;transition:color .2s
+        }
+        .btn-logout:hover{color:var(--red)}
+
+        /* ── MAIN ── */
+        .main{flex:1;margin-left:230px;padding:1.75rem;min-height:100vh}
+
+        /* ── TOPBAR ── */
+        .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem}
+        .pg-title{font-size:1.25rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:9px}
+        .pg-title i{color:var(--muted)}
+        .pg-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
+        .topbar-right{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+
+        /* ── STATS ── */
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;margin-bottom:1.5rem}
+        .scard{
+            background:var(--s1);border:1px solid var(--border);
+            border-radius:12px;padding:1.1rem 1.3rem;
+            transition:border-color .2s
+        }
+        .scard:hover{border-color:rgba(26,143,196,.25)}
+        .scard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem}
+        .scard-ico{
+            width:34px;height:34px;border-radius:8px;
+            display:flex;align-items:center;justify-content:center;font-size:.85rem
+        }
+        .scard-val{font-size:1.75rem;font-weight:700;color:#fff;line-height:1}
+        .scard-lbl{font-size:.74rem;color:var(--muted);margin-top:.25rem}
+
+        /* ── VIEWS ── */
+        .view{display:none}
+        .view.active{display:block;animation:fadeUp .25s ease}
+
+        /* ── FILTERS ── */
+        .filters{display:flex;gap:.6rem;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center}
+        .fsearch{
+            flex:1;min-width:200px;padding:8px 13px;
+            background:var(--s1);border:1px solid var(--border);border-radius:8px;
+            color:var(--text);font-family:'Inter',sans-serif;font-size:.84rem;outline:none;
+            display:flex;align-items:center;gap:8px;
+            transition:border-color .2s
+        }
+        input.fsearch{transition:border-color .2s}
+        input.fsearch:focus,.fsel-sm:focus{border-color:var(--border2)}
+        input.fsearch::placeholder{color:var(--muted)}
+        .fsel-sm{
+            padding:8px 13px;background:var(--s1);border:1px solid var(--border);
+            border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;
+            font-size:.82rem;outline:none;cursor:pointer;
+            appearance:none;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;background-position:right 10px center;
+            padding-right:28px;transition:border-color .2s
+        }
+        .fsel-sm option{background:var(--s2)}
+
+        /* ── TABLE ── */
+        .tbl-wrap{
+            background:var(--s1);border:1px solid var(--border);
+            border-radius:14px;overflow:hidden
+        }
+        table{width:100%;border-collapse:collapse}
+        thead tr{background:rgba(10,18,32,.9);border-bottom:1px solid rgba(26,143,196,.15)}
+        th{
+            padding:10px 14px;text-align:left;
+            font-size:.68rem;font-weight:600;letter-spacing:.1em;
+            text-transform:uppercase;color:var(--muted);white-space:nowrap
+        }
+        th i{margin-right:5px;opacity:.7}
+        tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+        tbody tr:last-child{border-bottom:none}
+        tbody tr:hover{background:rgba(26,143,196,.05)}
+        td{padding:12px 14px;font-size:.84rem;vertical-align:middle}
+        .tc-name{font-weight:500;color:#fff}
+        .tc-sub{font-size:.73rem;color:var(--muted);margin-top:1px}
+
+        /* ── BADGES ── */
+        .badge{
+            display:inline-flex;align-items:center;gap:4px;
+            padding:3px 9px;border-radius:100px;font-size:.7rem;font-weight:600
+        }
+        .b-green{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.18)}
+        .b-yellow{background:rgba(234,179,8,.1);color:var(--yellow);border:1px solid rgba(234,179,8,.18)}
+        .b-red{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.18)}
+        .b-blue{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.18)}
+        .b-gray{background:rgba(255,255,255,.05);color:var(--muted2);border:1px solid var(--border)}
+
+        /* ── ACTION BTNS ── */
+        .abtn{
+            padding:5px 9px;border-radius:6px;border:1px solid var(--border);
+            background:transparent;color:var(--muted);cursor:pointer;font-size:.75rem;
+            transition:all .15s;display:inline-flex;align-items:center;gap:4px;
+            font-family:'Inter',sans-serif
+        }
+        .abtn:hover{background:var(--s3);color:var(--text);border-color:var(--border2)}
+        .abtn.confirm:hover{background:rgba(34,197,94,.08);color:var(--green);border-color:rgba(34,197,94,.25)}
+        .abtn.del:hover{background:rgba(239,68,68,.08);color:var(--red);border-color:rgba(239,68,68,.25)}
+        .abtn.edit:hover{background:rgba(59,130,246,.08);color:var(--blue);border-color:rgba(59,130,246,.25)}
+
+        /* ── BUTTONS ── */
+        .btn-p{
+            padding:8px 16px;background:linear-gradient(135deg,#0a5a84,#1a8fc4);border:none;border-radius:7px;
+            color:#fff;font-weight:600;font-family:'Inter',sans-serif;font-size:.82rem;
+            cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s
+        }
+        .btn-p:hover{opacity:.88;transform:translateY(-1px)}
+        .btn-d{
+            padding:8px 16px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);
+            border-radius:7px;color:var(--red);font-weight:600;font-family:'Inter',sans-serif;
+            font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s
+        }
+        .btn-d:hover{background:rgba(239,68,68,.14)}
+        .btn-s{
+            padding:8px 16px;background:transparent;border:1px solid var(--border);
+            border-radius:7px;color:var(--muted);font-family:'Inter',sans-serif;
+            font-size:.82rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px
+        }
+        .btn-s:hover{border-color:var(--border2);color:var(--text)}
+
+        /* ── TEAMS ── */
+        .teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.1rem;margin-top:1.25rem}
+        .tcard{
+            background:var(--s1);border:1px solid var(--border);
+            border-radius:14px;overflow:hidden;
+            transition:transform .2s,border-color .2s
+        }
+        .tcard:hover{transform:translateY(-3px);border-color:rgba(26,143,196,.3)}
+        .tcard-head{
+            padding:1.1rem;display:flex;align-items:center;gap:10px;
+            border-bottom:1px solid var(--border)
+        }
+        .team-dot{
+            width:38px;height:38px;border-radius:9px;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;
+            font-weight:700;font-size:.9rem;color:rgba(0,0,0,.75)
+        }
+        .tcard-name{font-weight:600;color:#fff;font-size:.9rem}
+        .tcard-leader{font-size:.74rem;color:var(--muted);margin-top:1px;display:flex;align-items:center;gap:4px}
+        .tcard-stats{display:flex;padding:.9rem 1.1rem;gap:1.4rem;border-bottom:1px solid var(--border)}
+        .tsv{font-size:1.3rem;font-weight:700;color:#fff}
+        .tsl{font-size:.68rem;color:var(--muted);margin-top:1px}
+        .tcard-cells{padding:.75rem 1.1rem 1.1rem}
+        .cell-sec-lbl{font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;display:flex;align-items:center;gap:5px}
+        .crow{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:7px 0;border-bottom:1px solid var(--border);font-size:.81rem
+        }
+        .crow:last-child{border-bottom:none}
+        .cname{color:var(--text);font-weight:500}
+        .cldr{color:var(--muted);font-size:.72rem;display:flex;align-items:center;gap:4px;margin-top:1px}
+        .ccnt{font-weight:700;font-size:.95rem}
+
+        /* ── RANKING ── */
+        .rank-list{display:flex;flex-direction:column;gap:.65rem}
+        .rank-item{
+            background:var(--s1);border:1px solid var(--border);
+            border-radius:11px;padding:.9rem 1.1rem;
+            display:flex;align-items:center;gap:.9rem;
+            transition:transform .18s,border-color .18s
+        }
+        .rank-item:hover{transform:translateX(3px);border-color:rgba(26,143,196,.3)}
+        .rnum{
+            width:30px;height:30px;border-radius:7px;
+            display:flex;align-items:center;justify-content:center;
+            font-weight:700;font-size:.85rem;flex-shrink:0
+        }
+        .r1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000}
+        .r2{background:linear-gradient(135deg,#9ca3af,#6b7280);color:#fff}
+        .r3{background:linear-gradient(135deg,#b45309,#92400e);color:#fff}
+        .ro{background:var(--s3);color:var(--muted)}
+        .rinfo{flex:1;min-width:0}
+        .rname{font-weight:500;color:#fff;font-size:.87rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .rsub{font-size:.72rem;color:var(--muted);margin-top:1px}
+        .rbar-w{flex:1;max-width:120px;background:rgba(255,255,255,.06);border-radius:100px;height:5px;overflow:hidden}
+        .rbar{height:100%;border-radius:100px;background:linear-gradient(90deg,#1a8fc4,#38bdf8);transition:width .8s ease}
+        .rcnt{font-weight:700;font-size:1rem;color:var(--accent2);width:36px;text-align:right}
+
+        /* ── MODAL ── */
+        .mbg{
+            position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
+            z-index:200;display:flex;align-items:center;justify-content:center;
+            padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .22s
+        }
+        .mbg.open{opacity:1;pointer-events:all}
+        .mbox{
+            background:var(--s1);border:1px solid var(--border2);
+            border-radius:18px;padding:1.8rem;
+            width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
+            transform:scale(.95);transition:transform .22s
+        }
+        .mbg.open .mbox{transform:scale(1)}
+        .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem}
+        .mtitle{font-size:1rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px}
+        .mtitle i{color:var(--muted2)}
+        .mclose{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:4px;transition:color .2s}
+        .mclose:hover{color:var(--red)}
+
+        .mfg{margin-bottom:1.1rem}
+        .mfg label{display:flex;align-items:center;gap:6px;font-size:.73rem;font-weight:500;color:var(--muted2);margin-bottom:.4rem}
+        .mfg label i{font-size:.7rem}
+        .mfi,.mfsel{
+            width:100%;padding:10px 13px;background:var(--s3);border:1px solid var(--border);
+            border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:.87rem;outline:none;
+            transition:border-color .2s
+        }
+        .mfi:focus,.mfsel:focus{border-color:#1a8fc4}
+        .mfsel{appearance:none;cursor:pointer;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+        .mfsel option{background:var(--s2)}
+        .mfrow{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+
+        .mfoot{display:flex;gap:.6rem;margin-top:1.4rem;justify-content:flex-end}
+
+        /* FINALIZE WARNING */
+        .f-warn{
+            background:rgba(234,179,8,.06);border:1px solid rgba(234,179,8,.18);
+            border-radius:10px;padding:.9rem 1.1rem;
+            display:flex;gap:9px;font-size:.82rem;color:var(--yellow);line-height:1.55
+        }
+
+        /* ── DRAWER ── */
+        .dbg{
+            position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;
+            opacity:0;pointer-events:none;transition:opacity .22s
+        }
+        .dbg.open{opacity:1;pointer-events:all}
+        .drawer{
+            position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;
+            background:var(--s1);border-left:1px solid var(--border);z-index:151;
+            transform:translateX(100%);transition:transform .28s ease;
+            overflow-y:auto;padding:1.75rem
+        }
+        .dbg.open .drawer{transform:translateX(0)}
+        .dhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.75rem}
+        .dname{font-size:1rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px}
+        .dname i{color:var(--muted)}
+        .irows{display:flex;flex-direction:column;gap:0}
+        .irow{
+            display:flex;justify-content:space-between;align-items:flex-start;
+            font-size:.83rem;padding:.75rem 0;border-bottom:1px solid var(--border)
+        }
+        .irow:last-child{border-bottom:none}
+        .ikey{color:var(--muted);display:flex;align-items:center;gap:6px;flex-shrink:0;padding-right:1rem}
+        .ikey i{font-size:.76rem;width:14px;text-align:center}
+        .ival{color:var(--text);text-align:right;max-width:58%}
+        .dactions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+
+        /* ── EMPTY STATE ── */
+        .empty{text-align:center;padding:3.5rem 2rem;color:var(--muted)}
+        .empty i{font-size:2rem;margin-bottom:.8rem;opacity:.25;display:block}
+        .empty p{font-size:.85rem}
+
+        /* ── HAMBURGUER ── */
+        .ham{
+            display:none;background:var(--s1);border:1px solid var(--border);
+            border-radius:7px;width:36px;height:36px;
+            align-items:center;justify-content:center;cursor:pointer;
+            color:var(--text);font-size:.9rem;
+            position:fixed;top:1rem;left:1rem;z-index:60
+        }
+
+        /* ── GRID HELPERS ── */
+        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+        @media(max-width:900px){
+            .sidebar{transform:translateX(-100%)}
+            .sidebar.open{transform:none}
+            .main{margin-left:0;padding:1.2rem;padding-top:3.8rem}
+            .ham{display:flex}
+            .teams-grid{grid-template-columns:1fr}
+            .grid2{grid-template-columns:1fr}
+        }
+        @media(max-width:600px){
+            .stats{grid-template-columns:1fr 1fr}
+            .filters{flex-direction:column;align-items:stretch}
+            .fsearch{min-width:auto}
+            .mfrow{grid-template-columns:1fr}
+        }
+
+        /* ── TOAST ── */
+        #toast{
+            position:fixed;bottom:1.5rem;right:1.5rem;
+            background:var(--s2);border:1px solid var(--border2);
+            border-radius:9px;padding:10px 16px;font-size:.82rem;color:var(--text);
+            z-index:999;display:flex;align-items:center;gap:8px;
+            transform:translateY(60px);opacity:0;
+            transition:all .28s;pointer-events:none;max-width:320px
+        }
+        #toast.show{transform:translateY(0);opacity:1}
+        #toast .ti{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;flex-shrink:0}
+        #toast.t-ok .ti{background:rgba(34,197,94,.15);color:var(--green)}
+        #toast.t-warn .ti{background:rgba(234,179,8,.15);color:var(--yellow)}
+
+
+        .rv-btn{
+            padding:8px 20px;border-radius:7px;
+            border:1px solid rgba(26,143,196,.2);
+            background:rgba(26,143,196,.06);
+            color:var(--muted2);font-family:'Inter',sans-serif;
+            font-size:.82rem;font-weight:600;cursor:pointer;
+            transition:all .2s;letter-spacing:.04em
+        }
+        .rv-btn:hover{border-color:rgba(26,143,196,.4);color:#38bdf8;background:rgba(26,143,196,.12)}
+        .rv-btn.active{
+            background:linear-gradient(135deg,#0a5a84,#1a8fc4);
+            border-color:transparent;color:#fff;
+            box-shadow:0 4px 14px rgba(26,143,196,.3)
+        }
+        .rv-hist-col{padding:1.1rem;background:var(--s1)}
+        .rv-hist-col:first-child{border-radius:0 0 0 14px}
+        .rv-hist-col:last-child{border-radius:0 0 14px 0}
+        .rv-hist-lbl{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;display:flex;align-items:center;gap:6px}
+        .rv-hist-stat{font-size:1.4rem;font-weight:700;color:#fff}
+        .rv-hist-sub{font-size:.72rem;color:var(--muted2);margin-top:2px}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+        /* ── SECTION DIVS INSIDE VIEWS ── */
+        .view-sec{
+            background:var(--s1);border:1px solid var(--border);
+            border-radius:14px;overflow:hidden;margin-bottom:1.25rem
+        }
+        .view-sec-head{
+            padding:.9rem 1.1rem;border-bottom:1px solid var(--border);
+            display:flex;align-items:center;justify-content:space-between;
+            font-size:.84rem;font-weight:600;color:#fff
+        }
+        .view-sec-head span{display:flex;align-items:center;gap:7px}
+        .view-sec-head i{color:var(--muted)}
+
+        .rel-rv-tab{
+            padding:6px 14px;border-radius:6px;
+            border:1px solid rgba(26,143,196,.15);
+            background:transparent;color:var(--muted2);
+            font-family:'Inter',sans-serif;font-size:.78rem;
+            font-weight:600;cursor:pointer;transition:all .2s
+        }
+        .rel-rv-tab:hover{border-color:rgba(26,143,196,.35);color:#38bdf8;background:rgba(26,143,196,.08)}
+        .rel-rv-tab.active{background:rgba(26,143,196,.14);border-color:rgba(56,189,248,.4);color:#38bdf8}
+        .ano-tab{
+            padding:7px 18px;border-radius:7px;
+            border:1px solid rgba(26,143,196,.15);
+            background:transparent;color:var(--muted2);
+            font-family:'Inter',sans-serif;font-size:.85rem;
+            font-weight:700;cursor:pointer;transition:all .2s
+        }
+        .ano-tab:hover{border-color:rgba(26,143,196,.35);color:#38bdf8;background:rgba(26,143,196,.08)}
+        .ano-tab.active{background:linear-gradient(135deg,#0a5a84,#1a8fc4);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(26,143,196,.25)}
+    </style>
+</head>
+<body>
+
+<div id="toast"><div class="ti"></div><span id="toastMsg"></span></div>
+
+<!-- ── LOGIN ── -->
+<div id="loginPage">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="login-ico"><i class="fas fa-shield-halved"></i></div>
+            <div class="login-title">Painel Administrativo</div>
+            <div class="login-sub">Revisão de Vidas — Sara Itapema</div>
+        </div>
+        <div class="fld">
+            <label><i class="fas fa-user"></i> Usuário</label>
+            <input type="text" id="loginUser" placeholder="nome de usuário" autocomplete="username">
+        </div>
+        <div class="fld">
+            <label><i class="fas fa-lock"></i> Senha</label>
+            <input type="password" id="loginPass" placeholder="sua senha" autocomplete="current-password"
+                   onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="btn-login" onclick="doLogin()">
+            <i class="fas fa-arrow-right-to-bracket"></i> Entrar
+        </button>
+        <div class="login-err" id="loginErr">
+            <i class="fas fa-circle-exclamation"></i>
+            <span>Usuário ou senha inválidos.</span>
+        </div>
+        <p style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:1.3rem">
+            Padrão: <code style="color:var(--muted2)">admin</code> / <code style="color:var(--muted2)">admin123</code>
+        </p>
+    </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="appPage">
+    <button class="ham" id="hamBtn" onclick="toggleSB()"><i class="fas fa-bars"></i></button>
+
+    <div class="layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sb-head">
+                <div class="sb-logo-wrap">
+                    <img src="logo.png" alt="Logo Sara Itapema"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    <div class="sb-logo-fallback" title="Coloque logo.png na pasta do servidor">
+                        <i class="fas fa-image"></i> logo.png
+                    </div>
+                </div>
+                <div class="sb-name">Revisão de Vidas</div>
+                <div class="sb-sub">Painel Administrativo</div>
+            </div>
+            <nav class="sb-nav">
+                <div class="nav-sec-lbl">Principal</div>
+                <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">
+                    <span class="ni"><i class="fas fa-gauge-high"></i></span> Dashboard
+                </div>
+                <div class="nav-item" id="nav-revisionistas" onclick="showView('revisionistas')">
+                    <span class="ni"><i class="fas fa-users"></i></span> Revisionistas
+                    <span class="nav-badge" id="navCount">0</span>
+                </div>
+                <div class="nav-sec-lbl">Organização</div>
+                <div class="nav-item" id="nav-equipes" onclick="showView('equipes')">
+                    <span class="ni"><i class="fas fa-people-group"></i></span> Equipes
+                </div>
+                <div class="nav-item" id="nav-ranking" onclick="showView('ranking')">
+                    <span class="ni"><i class="fas fa-trophy"></i></span> Ranking
+                </div>
+                <div class="nav-sec-lbl">Config</div>
+                <div class="nav-item" id="nav-relatorios" onclick="showView('relatorios')">
+                    <span class="ni"><i class="fas fa-chart-bar"></i></span> Relatórios
+                </div>
+                <div class="nav-item" id="nav-site" onclick="showView('site')">
+                    <span class="ni"><i class="fas fa-globe"></i></span> Site
+                </div>
+                <div class="nav-item" id="nav-usuarios" onclick="showView('usuarios')">
+                    <span class="ni"><i class="fas fa-user-gear"></i></span> Usuários
+                </div>
+            </nav>
+            <div class="sb-foot">
+                <div class="user-row">
+                    <div class="uav" id="uav">AD</div>
+                    <div>
+                        <div class="uname" id="uname">Admin</div>
+                        <div class="urole">Administrador</div>
+                    </div>
+                    <button class="btn-logout" title="Sair" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main">
+
+            <!-- ── DASHBOARD ── -->
+            <div class="view active" id="view-dashboard">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-gauge-high"></i> Dashboard</div>
+                        <div class="pg-sub">Visão geral em tempo real</div>
+                    </div>
+                    <div class="topbar-right">
+                        <select class="fsel-sm" id="dashRV" onchange="renderDashboard()">
+                            <option value="all">Todas as Revisões</option>
+                            <option value="RV1">RV1 — Jan/Mar</option>
+                            <option value="RV2">RV2 — Abr/Jun</option>
+                            <option value="RV3">RV3 — Jul/Set</option>
+                            <option value="RV4">RV4 — Out/Dez</option>
+                        </select>
+                        <button class="btn-d" onclick="openModal('finalizeModal')">
+                            <i class="fas fa-flag-checkered"></i> Finalizar Revisão
+                        </button>
+                    </div>
+                </div>
+                <div class="stats" id="statsGrid"></div>
+                <div class="grid2">
+                    <div class="view-sec">
+                        <div class="view-sec-head">
+                            <span><i class="fas fa-clock-rotate-left"></i> Últimas Inscrições</span>
+                        </div>
+                        <div id="recentList"></div>
+                    </div>
+                    <div class="view-sec">
+                        <div class="view-sec-head">
+                            <span><i class="fas fa-trophy"></i> Top Equipes</span>
+                        </div>
+                        <div id="topTeams"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── REVISIONISTAS ── -->
+            <div class="view" id="view-revisionistas">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-users"></i> Revisionistas</div>
+                        <div class="pg-sub" id="revSub">Gerenciar inscrições</div>
+                    </div>
+                    <button class="btn-p" onclick="openAddRev()"><i class="fas fa-plus"></i> Adicionar</button>
+                </div>
+                <div class="filters">
+                    <input type="text" class="fsearch" id="srch" placeholder="&#xf002;  Buscar por nome, CPF, telefone..." oninput="renderRevs()">
+                    <select class="fsel-sm" id="fRV" onchange="renderRevs()">
+                        <option value="all">Todas as RV</option>
+                        <option value="RV1">RV1</option><option value="RV2">RV2</option>
+                        <option value="RV3">RV3</option><option value="RV4">RV4</option>
+                    </select>
+                    <select class="fsel-sm" id="fPag" onchange="renderRevs()">
+                        <option value="all">Todos pagamentos</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="pendente">Pendente</option>
+                    </select>
+                    <select class="fsel-sm" id="fEq" onchange="renderRevs()">
+                        <option value="all">Todas equipes</option>
+                    </select>
+                    <select class="fsel-sm" id="fAtivo" onchange="renderRevs()">
+                        <option value="true">Ativos</option>
+                        <option value="false">Finalizados</option>
+                        <option value="all">Todos</option>
+                    </select>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th><i class="fas fa-user"></i> Nome</th>
+                                <th><i class="fas fa-phone"></i> Contato</th>
+                                <th><i class="fas fa-people-group"></i> Equipe / Célula</th>
+                                <th><i class="fas fa-tag"></i> RV</th>
+                                <th><i class="fas fa-circle-dollar-to-slot"></i> Pagamento</th>
+                                <th><i class="fas fa-sliders"></i> Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="revBody"></tbody>
+                    </table>
+                    <div class="empty" id="revEmpty" style="display:none">
+                        <i class="fas fa-user-slash"></i>
+                        <p>Nenhum revisionista encontrado com os filtros aplicados.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── EQUIPES ── -->
+            <div class="view" id="view-equipes">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-people-group"></i> Equipes</div>
+                        <div class="pg-sub">Gerenciar equipes e células</div>
+                    </div>
+                    <button class="btn-p" onclick="openTeamModal()"><i class="fas fa-plus"></i> Nova Equipe</button>
+                </div>
+                <div class="teams-grid" id="teamsGrid"></div>
+                <div class="empty" id="teamsEmpty" style="display:none">
+                    <i class="fas fa-people-group"></i>
+                    <p>Nenhuma equipe cadastrada. Crie a primeira!</p>
+                </div>
+            </div>
+
+            <!-- ── RANKING ── -->
+            <div class="view" id="view-ranking">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-trophy"></i> Ranking</div>
+                        <div class="pg-sub">Equipes e células que mais levaram</div>
+                    </div>
+                    <select class="fsel-sm" id="rankRV" onchange="renderRanking()">
+                        <option value="all">Todas as RV</option>
+                        <option value="RV1">RV1</option><option value="RV2">RV2</option>
+                        <option value="RV3">RV3</option><option value="RV4">RV4</option>
+                    </select>
+                </div>
+                <div class="grid2">
+                    <div>
+                        <div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem;display:flex;align-items:center;gap:6px">
+                            <i class="fas fa-people-group" style="color:var(--accent2)"></i> Ranking de Equipes
+                        </div>
+                        <div class="rank-list" id="rankTeams"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem;display:flex;align-items:center;gap:6px">
+                            <i class="fas fa-users" style="color:var(--accent2)"></i> Ranking de Células
+                        </div>
+                        <div class="rank-list" id="rankCells"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── USUÁRIOS ── -->
+            <div class="view" id="view-usuarios">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-user-gear"></i> Usuários</div>
+                        <div class="pg-sub">Gerenciar acessos ao painel</div>
+                    </div>
+                    <button class="btn-p" onclick="openModal('userModal')"><i class="fas fa-plus"></i> Novo Usuário</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-at"></i> Usuário</th>
+                                <th><i class="fas fa-id-badge"></i> Nome</th>
+                                <th><i class="fas fa-shield"></i> Perfil</th>
+                                <th><i class="fas fa-sliders"></i> Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <!-- ── SITE ── -->
+            <div class="view" id="view-site">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-globe"></i> Controle do Site</div>
+                        <div class="pg-sub">Gerencie qual revisão está ativa no site de inscrições</div>
+                    </div>
+                </div>
+
+                <!-- STATUS ATUAL -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem">
+                    <div class="view-sec" style="padding:1.75rem">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.4rem">
+                            <div style="width:42px;height:42px;border-radius:10px;background:rgba(26,143,196,.12);border:1px solid rgba(26,143,196,.25);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#38bdf8"><i class="fas fa-circle-dot"></i></div>
+                            <div>
+                                <div style="font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">Revisão Ativa no Site</div>
+                                <div style="font-size:1.8rem;font-weight:700;color:#fff;margin-top:2px" id="siteRVAtual">—</div>
+                            </div>
+                        </div>
+                        <p style="font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1.4rem" id="siteRVDesc">Carregando...</p>
+
+                        <div style="border-top:1px solid rgba(26,143,196,.1);padding-top:1.2rem">
+                            <div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem">
+                                <i class="fas fa-sliders" style="margin-right:5px"></i>Alterar revisão manualmente
+                            </div>
+                            <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+                                <button class="rv-btn" data-rv="RV1" onclick="setRVAtiva('RV1')">RV1</button>
+                                <button class="rv-btn" data-rv="RV2" onclick="setRVAtiva('RV2')">RV2</button>
+                                <button class="rv-btn" data-rv="RV3" onclick="setRVAtiva('RV3')">RV3</button>
+                                <button class="rv-btn" data-rv="RV4" onclick="setRVAtiva('RV4')">RV4</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PREVIEW MINI -->
+                    <div class="view-sec" style="overflow:hidden;position:relative;min-height:300px">
+                        <div style="padding:.9rem 1.1rem;border-bottom:1px solid rgba(26,143,196,.1);display:flex;align-items:center;justify-content:space-between">
+                            <span style="font-size:.82rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:7px">
+                                <i class="fas fa-eye" style="color:var(--muted)"></i> Pré-visualização do Site
+                            </span>
+                            <a href="/inscricao.html" target="_blank" class="abtn" style="font-size:.75rem;text-decoration:none">
+                                <i class="fas fa-arrow-up-right-from-square"></i> Abrir
+                            </a>
+                        </div>
+                        <iframe src="/inscricao.html" style="width:100%;height:320px;border:none;transform:scale(.6);transform-origin:top left;width:166%;height:533px;pointer-events:none" scrolling="no" title="Preview"></iframe>
+                        <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,var(--s1))"></div>
+                    </div>
+                </div>
+
+                <!-- HISTÓRICO -->
+                <div class="view-sec">
+                    <div class="view-sec-head">
+                        <span><i class="fas fa-clock-rotate-left"></i> Revisões do Ano</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,143,196,.08)">
+                        <div class="rv-hist-col" id="hist-RV1"></div>
+                        <div class="rv-hist-col" id="hist-RV2"></div>
+                        <div class="rv-hist-col" id="hist-RV3"></div>
+                        <div class="rv-hist-col" id="hist-RV4"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ── RELATÓRIOS ── -->
+            <div class="view" id="view-relatorios">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-chart-bar"></i> Relatórios</div>
+                        <div class="pg-sub">Histórico completo por ano — nenhum dado é perdido</div>
+                    </div>
+                    <button class="btn-d" onclick="abrirModalFinalizarAno()" id="btnFinalizarAno">
+                        <i class="fas fa-calendar-xmark"></i> Finalizar Ano
+                    </button>
+                </div>
+
+                <!-- Seletor de Ano -->
+                <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.4rem;flex-wrap:wrap" id="anoTabs"></div>
+
+                <!-- Cards de resumo por RV + total -->
+                <div id="relSummaryCards" style="margin-bottom:1.4rem"></div>
+
+                <!-- Rankings lado a lado -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+                    <!-- Ranking Equipes -->
+                    <div class="view-sec">
+                        <div class="view-sec-head"><span><i class="fas fa-trophy"></i> Ranking de Equipes</span></div>
+                        <div id="relRankEquipes" style="padding:.5rem 1rem 1rem"></div>
+                    </div>
+                    <!-- Ranking Células -->
+                    <div class="view-sec">
+                        <div class="view-sec-head"><span><i class="fas fa-medal"></i> Ranking de Células</span></div>
+                        <div id="relRankCelulas" style="padding:.5rem 1rem 1rem"></div>
+                    </div>
+                </div>
+
+                <!-- Equipes com dropdown de células -->
+                <div class="view-sec" style="margin-bottom:1.25rem">
+                    <div class="view-sec-head"><span><i class="fas fa-people-group"></i> Equipes &amp; Células</span></div>
+                    <div id="relEquipes" style="padding:.5rem 1rem 1rem"></div>
+                </div>
+
+                <!-- Tabela de inscritos -->
+                <div class="view-sec">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid rgba(26,143,196,.1);flex-wrap:wrap;gap:.6rem">
+                        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+                            <button class="rel-rv-tab active" data-rv="all" onclick="filterRelTable('all')">Todos</button>
+                            <button class="rel-rv-tab" data-rv="RV1" onclick="filterRelTable('RV1')">RV1</button>
+                            <button class="rel-rv-tab" data-rv="RV2" onclick="filterRelTable('RV2')">RV2</button>
+                            <button class="rel-rv-tab" data-rv="RV3" onclick="filterRelTable('RV3')">RV3</button>
+                            <button class="rel-rv-tab" data-rv="RV4" onclick="filterRelTable('RV4')">RV4</button>
+                        </div>
+                        <button class="abtn" onclick="exportCSV()" style="font-size:.78rem;padding:6px 12px;display:flex;align-items:center;gap:5px">
+                            <i class="fas fa-file-csv"></i> Exportar CSV
+                        </button>
+                    </div>
+                    <div class="tbl-wrap">
+                        <table id="relTable">
+                            <thead><tr>
+                                <th>#</th>
+                                <th><i class="fas fa-user"></i> Nome</th>
+                                <th><i class="fas fa-tag"></i> RV</th>
+                                <th><i class="fas fa-people-group"></i> Equipe / Célula</th>
+                                <th><i class="fas fa-circle-check"></i> Pagamento</th>
+                                <th><i class="fab fa-whatsapp"></i> WhatsApp</th>
+                                <th><i class="fas fa-calendar"></i> Inscrição</th>
+                            </tr></thead>
+                            <tbody id="relBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="relEmpty" class="empty" style="display:none"><i class="fas fa-inbox"></i><p>Nenhum dado para este ano</p></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+
+<!-- ── MODAL: FINALIZAR ANO ── -->
+<div class="mbg" id="finalizarAnoModal">
+    <div class="mbox" style="max-width:420px">
+        <div class="mhead">
+            <div class="mtitle"><i class="fas fa-calendar-xmark"></i> Finalizar Ano</div>
+            <button class="mclose" onclick="closeModal('finalizarAnoModal')"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="f-warn" style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1.2rem;display:flex;gap:10px;align-items:flex-start">
+            <i class="fas fa-triangle-exclamation" style="color:#f87171;margin-top:2px;flex-shrink:0"></i>
+            <div style="font-size:.82rem;color:#fca5a5;line-height:1.65">
+                <strong>Ação irreversível.</strong> Todos os dados do ano atual serão arquivados e ficarão disponíveis apenas em Relatórios. O sistema reiniciará em <strong>RV1</strong> com o próximo ano.
+                <div style="margin-top:.6rem;color:var(--muted2)">Os dados <strong style="color:#fff">nunca são apagados</strong> — apenas movidos para o histórico.</div>
+            </div>
+        </div>
+        <div style="background:rgba(26,143,196,.06);border:1px solid rgba(26,143,196,.15);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:1.4rem;font-size:.83rem">
+            <div style="color:var(--muted2);margin-bottom:.3rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">Isso vai acontecer:</div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;color:var(--text)">
+                <span><i class="fas fa-archive" style="color:#38bdf8;width:16px"></i> Todos os inscritos de <strong id="anoAtualModal">2026</strong> serão arquivados</span>
+                <span><i class="fas fa-rotate-left" style="color:#38bdf8;width:16px"></i> RV ativa volta para RV1</span>
+                <span><i class="fas fa-calendar-plus" style="color:#38bdf8;width:16px"></i> Sistema avança para o ano <strong id="novoAnoModal">2027</strong></span>
+                <span><i class="fas fa-chart-bar" style="color:#38bdf8;width:16px"></i> Dados visíveis em Relatórios → <strong id="anoAtualModal2">2026</strong></span>
+            </div>
+        </div>
+        <div style="display:flex;gap:.7rem">
+            <button class="btn-s" style="flex:1" onclick="closeModal('finalizarAnoModal')"><i class="fas fa-xmark"></i> Cancelar</button>
+            <button class="btn-d" style="flex:1" onclick="executarFinalizarAno()"><i class="fas fa-calendar-xmark"></i> Confirmar Finalização</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: FINALIZAR ── -->
+<div class="mbg" id="finalizeModal">
+    <div class="mbox" style="max-width:410px">
+        <div class="mhead">
+            <div class="mtitle"><i class="fas fa-flag-checkered"></i> Finalizar Revisão</div>
+            <button class="mclose" onclick="closeModal('finalizeModal')"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="f-warn">
+            <i class="fas fa-triangle-exclamation" style="margin-top:2px;flex-shrink:0"></i>
+            <div>Todos os revisionistas <strong>ativos</strong> serão marcados como finalizados e sairão da lista principal. Os dados ficam preservados no histórico e acessíveis via filtro.</div>
+        </div>
+        <p style="font-size:.82rem;color:var(--muted);margin-top:1.1rem">Esta ação prepara o sistema para a próxima revisão.</p>
+        <div class="mfoot">
+            <button class="btn-s" onclick="closeModal('finalizeModal')"><i class="fas fa-xmark"></i> Cancelar</button>
+            <button class="btn-d" onclick="finalizeRV()"><i class="fas fa-flag-checkered"></i> Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: REVISIONISTA ── -->
+<div class="mbg" id="revModal">
+    <div class="mbox">
+        <div class="mhead">
+            <div class="mtitle"><i class="fas fa-user-plus"></i> <span id="revModalTitle">Adicionar Revisionista</span></div>
+            <button class="mclose" onclick="closeModal('revModal')"><i class="fas fa-xmark"></i></button>
+        </div>
+        <input type="hidden" id="rmId">
+        <div class="mfg">
+            <label><i class="fas fa-user"></i> Nome completo *</label>
+            <input class="mfi" id="rmName" placeholder="Nome completo">
+        </div>
+        <div class="mfrow">
+            <div class="mfg">
+                <label><i class="fas fa-id-card"></i> CPF</label>
+                <input class="mfi" id="rmCpf" placeholder="000.000.000-00" maxlength="11" inputmode="numeric">
+            </div>
+            <div class="mfg">
+                <label><i class="fab fa-whatsapp"></i> WhatsApp</label>
+                <input class="mfi" id="rmPhone" placeholder="(XX) XXXXX-XXXX">
+            </div>
+        </div>
+        <div class="mfrow">
+            <div class="mfg">
+                <label><i class="fas fa-venus-mars"></i> Sexo</label>
+                <select class="mfsel" id="rmSexo">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                </select>
+            </div>
+            <div class="mfg">
+                <label><i class="fas fa-tag"></i> Revisão</label>
+                <select class="mfsel" id="rmRV">
+                    <option value="RV1">RV1</option><option value="RV2">RV2</option>
+                    <option value="RV3">RV3</option><option value="RV4">RV4</option>
+                </select>
+            </div>
+        </div>
+        <div class="mfrow">
+            <div class="mfg">
+                <label><i class="fas fa-people-group"></i> Equipe</label>
+                <select class="mfsel" id="rmEq" onchange="updateCels()">
+                    <option value="">— Sem equipe —</option>
+                </select>
+            </div>
+            <div class="mfg">
+                <label><i class="fas fa-users"></i> Célula</label>
+                <select class="mfsel" id="rmCel">
+                    <option value="">— Sem célula —</option>
+                </select>
+            </div>
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-circle-dollar-to-slot"></i> Pagamento</label>
+            <select class="mfsel" id="rmPag">
+                <option value="pendente">Pendente</option>
+                <option value="confirmado">Confirmado</option>
+            </select>
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-user-tie"></i> Líder / Quem convidou</label>
+            <input class="mfi" id="rmLider" placeholder="Nome do líder">
+        </div>
+        <div class="mfoot">
+            <button class="btn-s" onclick="closeModal('revModal')"><i class="fas fa-xmark"></i> Cancelar</button>
+            <button class="btn-p" onclick="saveRev()"><i class="fas fa-floppy-disk"></i> Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: EQUIPE ── -->
+<div class="mbg" id="teamModal">
+    <div class="mbox">
+        <div class="mhead">
+            <div class="mtitle"><i class="fas fa-people-group"></i> <span id="tmTitle">Nova Equipe</span></div>
+            <button class="mclose" onclick="closeModal('teamModal')"><i class="fas fa-xmark"></i></button>
+        </div>
+        <input type="hidden" id="tmId">
+        <div class="mfg">
+            <label><i class="fas fa-signature"></i> Nome da equipe *</label>
+            <input class="mfi" id="tmName" placeholder="Ex: Equipe Fogo">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-user-tie"></i> Líder *</label>
+            <input class="mfi" id="tmLeader" placeholder="Nome do líder">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-palette"></i> Cor da equipe *</label>
+            <input type="color" id="tmColor" value="#2563eb"
+                   style="width:100%;height:40px;border:1px solid var(--border);border-radius:8px;background:var(--s3);cursor:pointer;padding:3px 6px">
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1.2rem;margin-top:.3rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
+                <div style="font-size:.78rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px">
+                    <i class="fas fa-users" style="color:var(--muted2)"></i> Células
+                </div>
+                <button type="button" class="btn-p" style="padding:5px 12px;font-size:.76rem" onclick="addCelFld()">
+                    <i class="fas fa-plus"></i> Adicionar
+                </button>
+            </div>
+            <div id="celsFields"></div>
+        </div>
+        <div class="mfoot">
+            <button class="btn-s" onclick="closeModal('teamModal')"><i class="fas fa-xmark"></i> Cancelar</button>
+            <button class="btn-p" onclick="saveTeam()"><i class="fas fa-floppy-disk"></i> Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: USUÁRIO ── -->
+<div class="mbg" id="userModal">
+    <div class="mbox" style="max-width:380px">
+        <div class="mhead">
+            <div class="mtitle"><i class="fas fa-user-plus"></i> Novo Usuário</div>
+            <button class="mclose" onclick="closeModal('userModal')"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-at"></i> Usuário (login) *</label>
+            <input class="mfi" id="umUser" placeholder="nome_usuario">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-id-badge"></i> Nome *</label>
+            <input class="mfi" id="umName" placeholder="Nome completo">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-lock"></i> Senha *</label>
+            <input type="password" class="mfi" id="umPass" placeholder="Senha">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-shield"></i> Perfil</label>
+            <select class="mfsel" id="umRole">
+                <option value="admin">Administrador</option>
+                <option value="lider">Líder</option>
+                <option value="viewer">Visualizador</option>
+            </select>
+        </div>
+        <div class="mfoot">
+            <button class="btn-s" onclick="closeModal('userModal')"><i class="fas fa-xmark"></i> Cancelar</button>
+            <button class="btn-p" onclick="saveUser()"><i class="fas fa-floppy-disk"></i> Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── DRAWER ── -->
+<div class="dbg" id="dbg" onclick="closeDrawer()">
+    <div class="drawer" id="drawer" onclick="event.stopPropagation()">
+        <div class="dhead">
+            <div>
+                <div class="dname"><i class="fas fa-user-circle"></i> <span id="dname">—</span></div>
+                <div id="dbadge" style="margin-top:7px"></div>
+            </div>
+            <button class="mclose" onclick="closeDrawer()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="irows" id="drows"></div>
+        <div class="dactions" id="dactions"></div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  API CLIENT
+// ═══════════════════════════════════════════════════════════
+// Vercel: mesmo domínio. Local: porta 3000
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? `${window.location.protocol}//${window.location.hostname}:3000`
+    : `${window.location.protocol}//${window.location.host}`;
+
+const API = (() => {
+    const h = { 'Content-Type': 'application/json' };
+
+    async function req(method, path, body) {
+        const opts = { method, headers: h };
+        if (body) opts.body = JSON.stringify(body);
+        const r    = await fetch(API_BASE + path, opts);
+        const text = await r.text();
+        if (!text) throw new Error('Resposta vazia do servidor');
+        let json;
+        try { json = JSON.parse(text); }
+        catch(e) { throw new Error('Resposta inválida: ' + text.substring(0,80)); }
+        if (!json.success) throw new Error(json.error || 'Erro na API');
+        return json.data;
+    }
+
+    return {
+        get:    p     => req('GET',    p),
+        post:   (p,b) => req('POST',   p, b),
+        put:    (p,b) => req('PUT',    p, b),
+        patch:  (p,b) => req('PATCH',  p, b),
+        delete: p     => req('DELETE', p),
+    };
+})();
+
+// ═══════════════════════════════
+//  AUTH
+// ═══════════════════════════════
+let CU = null;
+
+async function doLogin() {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value;
+    if (!u || !p) { showLoginErr('Preencha usuário e senha'); return; }
+    const btn = document.querySelector('.btn-login');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+    btn.disabled  = true;
+    try {
+        const user = await API.post('/api/auth/login', { username: u, password: p });
+        CU = user;
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display   = 'block';
+        document.getElementById('uname').textContent = user.name;
+        document.getElementById('uav').textContent   = user.name.substring(0,2).toUpperCase();
+        initApp();
+    } catch(e) {
+        showLoginErr(e.message.includes('inválid') ? 'Usuário ou senha incorretos' : 'Erro: ' + e.message);
+    } finally {
+        btn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Entrar';
+        btn.disabled  = false;
+    }
+}
+
+function showLoginErr(msg) {
+    const el = document.getElementById('loginErr');
+    el.querySelector('span').textContent = msg;
+    el.style.display = 'flex';
+    setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function doLogout() {
+    CU = null;
+    document.getElementById('appPage').style.display   = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+}
+
+// ═══════════════════════════════
+//  NAV
+// ═══════════════════════════════
+function showView(v) {
+    document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    document.getElementById('view-' + v).classList.add('active');
+    document.getElementById('nav-' + v).classList.add('active');
+    if (v === 'ranking')       renderRanking();
+    if (v === 'equipes')       renderTeams();
+    if (v === 'revisionistas') renderRevs();
+    if (v === 'dashboard')     renderDashboard();
+    if (v === 'usuarios')      renderUsers();
+    if (v === 'site')          renderSite();
+    if (v === 'relatorios')    renderRelatorios();
+    if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
+}
+function toggleSB() { document.getElementById('sidebar').classList.toggle('open'); }
+document.addEventListener('click', e => {
+    const sb = document.getElementById('sidebar'), hb = document.getElementById('hamBtn');
+    if (window.innerWidth <= 900 && sb.classList.contains('open') && !sb.contains(e.target) && !hb.contains(e.target))
+        sb.classList.remove('open');
+});
+
+// ═══════════════════════════════
+//  INIT
+// ═══════════════════════════════
+// Globals carregados do banco ao login
+let _rvAtiva  = 'RV1';
+let _anoAtivo = 2026;
+
+async function initApp() {
+    try {
+        const cfg = await API.get('/api/config');
+        _rvAtiva  = cfg.rv_ativa  || 'RV1';
+        _anoAtivo = parseInt(cfg.ano_ativo || 2026);
+    } catch(e) { _rvAtiva = 'RV1'; _anoAtivo = 2026; }
+
+    // Seta selects de filtro para a RV ativa
+    ['dashRV','fRV','rankRV'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = _rvAtiva;
+    });
+
+    renderDashboard();
+    renderRevs();
+    renderTeams();
+    renderRanking();
+    renderUsers();
+    updateEqFilter();
+}
+
+// Cache de equipes
+let _equipes = [];
+async function getEquipes(force = false) {
+    if (!force && _equipes.length) return _equipes;
+    _equipes = await API.get('/api/equipes');
+    return _equipes;
+}
+function getEqById(id) {
+    return _equipes.find(e => e.id?.toString() === id?.toString()) || null;
+}
+
+// ═══════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════
+async function renderDashboard() {
+    const rv = document.getElementById('dashRV').value;
+    try {
+        const [stats, revs, eqs] = await Promise.all([
+            API.get(`/api/stats?revisao=${rv}`),
+            API.get(`/api/revisionistas?ativo=true&revisao=${rv}`),
+            getEquipes()
+        ]);
+
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8"><i class="fas fa-users"></i></div></div><div class="scard-val">${stats.ativos||0}</div><div class="scard-lbl">Inscritos Ativos</div></div>
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(34,197,94,.1);color:#22c55e"><i class="fas fa-circle-check"></i></div></div><div class="scard-val">${stats.pagos||0}</div><div class="scard-lbl">Pagamentos Confirmados</div></div>
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(234,179,8,.1);color:#eab308"><i class="fas fa-clock"></i></div></div><div class="scard-val">${stats.pendentes||0}</div><div class="scard-lbl">Aguardando Pagamento</div></div>
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(168,85,247,.1);color:#a855f7"><i class="fas fa-people-group"></i></div></div><div class="scard-val">${stats.equipes||0}</div><div class="scard-lbl">Equipes</div></div>
+        `;
+
+        const recent = revs.slice(0, 6);
+        document.getElementById('recentList').innerHTML = recent.length
+            ? recent.map(r => `
+                <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(26,143,196,.1)">
+                    <div style="width:32px;height:32px;border-radius:50%;background:rgba(26,143,196,.12);border:1px solid rgba(26,143,196,.2);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:#38bdf8;font-weight:700;flex-shrink:0">${(r.nome_completo||'??').substring(0,2).toUpperCase()}</div>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:.83rem;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nome_completo||'—'}</div>
+                        <div style="font-size:.7rem;color:var(--muted2);display:flex;align-items:center;gap:4px"><i class="fas fa-user-tie" style="font-size:.64rem"></i> ${r.lider_ou_convite||r.equipe_nome||'—'}</div>
+                    </div>
+                    <span class="badge ${r.pagamento==='confirmado'?'b-green':'b-yellow'}"><i class="fas fa-${r.pagamento==='confirmado'?'check':'clock'}"></i>${r.pagamento==='confirmado'?'Pago':'Pendente'}</span>
+                </div>`).join('')
+            : '<div class="empty"><i class="fas fa-inbox"></i><p>Sem inscrições ainda</p></div>';
+
+        const topTeams = eqs.map(e => ({name:e.name,color:e.color,count:e.total||0}))
+            .sort((a,b) => b.count-a.count).slice(0,5);
+        document.getElementById('topTeams').innerHTML = topTeams.length
+            ? topTeams.map((t,i) => `
+                <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(26,143,196,.1)">
+                    <div style="width:26px;height:26px;border-radius:6px;background:${t.color};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.72rem;color:rgba(0,0,0,.7)">${i+1}</div>
+                    <div style="flex:1;font-size:.83rem;font-weight:500;color:#fff">${t.name}</div>
+                    <div style="font-weight:700;color:#38bdf8;font-size:.9rem">${t.count}</div>
+                </div>`).join('')
+            : '<div class="empty"><i class="fas fa-people-group"></i><p>Sem equipes</p></div>';
+
+        document.getElementById('navCount').textContent = stats.ativos || 0;
+    } catch(e) { console.error('Dashboard:', e); }
+}
+
+// ═══════════════════════════════
+//  REVISIONISTAS
+// ═══════════════════════════════
+async function renderRevs() {
+    const srch  = document.getElementById('srch').value;
+    const rv    = document.getElementById('fRV').value;
+    const pg    = document.getElementById('fPag').value;
+    const eq    = document.getElementById('fEq').value;
+    const ativo = document.getElementById('fAtivo').value;
+
+    const params = [];
+    if (rv !== 'all')    params.push(`revisao=${rv}`);
+    if (pg !== 'all')    params.push(`pagamento=${pg}`);
+    if (eq !== 'all')    params.push(`equipe_id=${eq}`);
+    if (ativo !== 'all') params.push(`ativo=${ativo}`);
+    if (srch)            params.push(`search=${encodeURIComponent(srch)}`);
+    const url = '/api/revisionistas?' + params.join('&');
+
+    try {
+        const data = await API.get(url);
+        await getEquipes();
+        const body  = document.getElementById('revBody');
+        const empty = document.getElementById('revEmpty');
+        document.getElementById('revSub').textContent = `${data.length} revisionista(s) encontrado(s)`;
+
+        if (!data.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
+        empty.style.display = 'none';
+
+        body.innerHTML = data.map((r,i) => `
+            <tr>
+                <td style="color:var(--muted);font-size:.78rem">${i+1}</td>
+                <td><div class="tc-name">${r.nome_completo||'—'}</div><div class="tc-sub"><i class="fas fa-venus-mars" style="font-size:.68rem;margin-right:3px"></i>${r.sexo||''} · <i class="fas fa-cake-candles" style="font-size:.68rem;margin-right:3px"></i>${r.data_nascimento||'—'}</div></td>
+                <td><div style="font-size:.82rem;display:flex;align-items:center;gap:4px"><i class="fab fa-whatsapp" style="color:#22c55e;font-size:.8rem"></i>${r.telefone||'—'}</div><div class="tc-sub"><i class="fas fa-user-tie" style="font-size:.68rem;margin-right:3px"></i>${r.lider_ou_convite||'—'}</div></td>
+                <td>${r.equipe_nome
+                    ? `<div style="display:flex;align-items:center;gap:5px;font-size:.81rem"><span style="width:8px;height:8px;border-radius:50%;background:${r.equipe_cor||'#888'};flex-shrink:0"></span>${r.equipe_nome}</div><div class="tc-sub"><i class="fas fa-users" style="font-size:.67rem;margin-right:3px"></i>${r.celula_nome||'—'}</div>`
+                    : '<span class="badge b-gray"><i class="fas fa-minus"></i> Sem equipe</span>'}</td>
+                <td><span class="badge b-blue"><i class="fas fa-tag"></i>${r.revisao||'—'}</span></td>
+                <td><span class="badge ${r.pagamento==='confirmado'?'b-green':'b-yellow'}"><i class="fas fa-${r.pagamento==='confirmado'?'check':'clock'}"></i>${r.pagamento==='confirmado'?'Confirmado':'Pendente'}</span></td>
+                <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+                    <button class="abtn" onclick="openDrawerById(${r.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
+                    <button class="abtn confirm" onclick="togglePay(${r.id},'${r.pagamento}')" title="Alterar pagamento"><i class="fas fa-${r.pagamento==='confirmado'?'xmark':'check'}"></i></button>
+                    <button class="abtn edit" onclick="openEditRevById(${r.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                    <button class="abtn del" onclick="delRev(${r.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                </div></td>
+            </tr>`).join('');
+    } catch(e) { console.error('renderRevs:', e); }
+}
+
+async function togglePay(id, current) {
+    const novoPag = current === 'confirmado' ? 'pendente' : 'confirmado';
+    try {
+        await API.patch(`/api/revisionistas/${id}/pagamento`, { pagamento: novoPag });
+        toast(novoPag === 'confirmado' ? 'Pagamento confirmado!' : 'Pagamento removido.', 'ok');
+        renderRevs(); renderDashboard();
+    } catch(e) {}
+}
+
+async function delRev(id) {
+    if (!confirm('Excluir este revisionista?')) return;
+    try {
+        await API.delete(`/api/revisionistas/${id}`);
+        toast('Excluído.', 'ok');
+        renderRevs(); renderDashboard();
+    } catch(e) {}
+}
+
+async function updateEqFilter() {
+    try {
+        const eqs = await getEquipes(true);
+        const sel = document.getElementById('fEq');
+        const cur = sel.value;
+        sel.innerHTML = '<option value="all">Todas equipes</option>';
+        eqs.forEach(e => sel.innerHTML += `<option value="${e.id}">${e.name}</option>`);
+        if (cur) sel.value = cur;
+    } catch(e) {}
+}
+
+async function openAddRev() {
+    document.getElementById('revModalTitle').textContent = 'Adicionar Revisionista';
+    document.getElementById('rmId').value    = '';
+    document.getElementById('rmName').value  = '';
+    document.getElementById('rmCpf').value   = '';
+    document.getElementById('rmPhone').value = '';
+    document.getElementById('rmSexo').value  = 'Masculino';
+    document.getElementById('rmRV').value    = getRV();
+    document.getElementById('rmPag').value   = 'pendente';
+    document.getElementById('rmLider').value = '';
+    await popEqSel();
+    openModal('revModal');
+}
+
+async function openEditRevById(id) {
+    try {
+        const r = await API.get(`/api/revisionistas/${id}`);
+        document.getElementById('revModalTitle').textContent = 'Editar Revisionista';
+        document.getElementById('rmId').value    = id;
+        document.getElementById('rmName').value  = r.nome_completo||'';
+        document.getElementById('rmCpf').value   = r.cpf||'';
+        document.getElementById('rmPhone').value = r.telefone||'';
+        document.getElementById('rmSexo').value  = r.sexo||'Masculino';
+        document.getElementById('rmRV').value    = r.revisao||getRV();
+        document.getElementById('rmPag').value   = r.pagamento||'pendente';
+        document.getElementById('rmLider').value = r.lider_ou_convite||'';
+        await popEqSel(r.equipe_id, r.celula_id);
+        openModal('revModal');
+    } catch(e) {}
+}
+
+async function popEqSel(selEq, selCel) {
+    const eqs = await getEquipes();
+    const s = document.getElementById('rmEq');
+    s.innerHTML = '<option value="">— Sem equipe —</option>';
+    eqs.forEach(e => s.innerHTML += `<option value="${e.id}">${e.name}</option>`);
+    if (selEq) s.value = selEq;
+    updateCels(selCel);
+}
+
+function updateCels(selCel) {
+    const eId = document.getElementById('rmEq').value;
+    const cs  = document.getElementById('rmCel');
+    cs.innerHTML = '<option value="">— Sem célula —</option>';
+    const eq = getEqById(eId);
+    if (eq && eq.celulas) eq.celulas.forEach(c =>
+        cs.innerHTML += `<option value="${c.id}">${c.nome}${c.lider?' — '+c.lider:''}</option>`);
+    if (selCel) cs.value = selCel;
+}
+
+async function saveRev() {
+    const id   = document.getElementById('rmId').value;
+    const name = document.getElementById('rmName').value.trim();
+    if (!name) { toast('Nome é obrigatório!','warn'); return; }
+    const data = {
+        nome_completo:    name,
+        cpf:              document.getElementById('rmCpf').value,
+        telefone:         document.getElementById('rmPhone').value,
+        sexo:             document.getElementById('rmSexo').value,
+        revisao:          document.getElementById('rmRV').value,
+        pagamento:        document.getElementById('rmPag').value,
+        lider_ou_convite: document.getElementById('rmLider').value,
+        equipe_id:        document.getElementById('rmEq').value || null,
+        celula_id:        document.getElementById('rmCel').value || null,
+        ativo: true
+    };
+    try {
+        if (id) { await API.put(`/api/revisionistas/${id}`, data); toast('Atualizado!','ok'); }
+        else    { await API.post('/api/inscricao', data);          toast('Adicionado!','ok'); }
+        closeModal('revModal');
+        renderRevs(); renderDashboard(); updateEqFilter();
+    } catch(e) {}
+}
+
+async function finalizeRV() {
+    const rv = document.getElementById('dashRV').value;
+    try {
+        const r = await API.post('/api/revisionistas/finalizar', { revisao: rv });
+        closeModal('finalizeModal');
+
+        // Atualiza RV ativa global e todos os filtros
+        _rvAtiva = r.nova_rv;
+        ['dashRV','fRV','rankRV'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = _rvAtiva;
+        });
+
+        toast(`✅ ${rv} finalizada! Site avançou para ${r.nova_rv}.`, 'ok');
+        renderRevs(); renderDashboard(); renderRanking();
+        // Atualiza aba Site se estiver aberta
+        renderSite();
+    } catch(e) {}
+}
+
+// ═══════════════════════════════
+//  DRAWER
+// ═══════════════════════════════
+async function openDrawerById(id) {
+    try {
+        const r = await API.get(`/api/revisionistas/${id}`);
+        document.getElementById('dname').textContent = r.nome_completo||'—';
+        document.getElementById('dbadge').innerHTML = `
+            <span class="badge ${r.pagamento==='confirmado'?'b-green':'b-yellow'}"><i class="fas fa-${r.pagamento==='confirmado'?'check':'clock'}"></i>${r.pagamento==='confirmado'?'Pago':'Pendente'}</span>
+            <span class="badge b-blue" style="margin-left:5px"><i class="fas fa-tag"></i>${r.revisao||'—'}</span>`;
+        const rows = [
+            ['fa-id-card','CPF',r.cpf||'—'],
+            ['fa-cake-candles','Nascimento',r.data_nascimento||'—'],
+            ['fa-venus-mars','Sexo',r.sexo||'—'],
+            ['fab fa-whatsapp','WhatsApp',r.telefone||'—'],
+            ['fa-house','Endereço',r.endereco||'—'],
+            ['fa-people-group','Equipe',r.equipe_nome||'—'],
+            ['fa-users','Célula',r.celula_nome||'—'],
+            ['fa-user-tie','Líder/Convite',r.lider_ou_convite||'—'],
+            ['fa-heart-pulse','Cond. Saúde',r.condicao_saude||'Nenhuma'],
+            ['fa-utensils','Rest. Alimentar',r.restricao_alimentar||'Nenhuma'],
+            ['fa-child','Filhos',r.informacao_filho||'Nenhum'],
+            ['fa-phone-volume','Contatos Emerg.',r.contatos_emergencia||'—'],
+            ['fa-star','Expectativa',r.expectativa||'—'],
+            ['fab fa-whatsapp','Grupo WA',r.entrou_grupo_whatsapp||'—'],
+            ['fa-calendar','Inscrição',r.data_inscricao?new Date(r.data_inscricao).toLocaleDateString('pt-BR'):'—'],
+        ];
+        document.getElementById('drows').innerHTML = rows.map(([ic,k,v]) => `
+            <div class="irow"><div class="ikey"><i class="fas ${ic}"></i>${k}</div><div class="ival">${v}</div></div>`).join('');
+        document.getElementById('dactions').innerHTML = `
+            <button class="btn-p" onclick="togglePay(${r.id},'${r.pagamento}');closeDrawer()">
+                <i class="fas fa-${r.pagamento==='confirmado'?'xmark':'check'}"></i>
+                ${r.pagamento==='confirmado'?'Remover Pag.':'Confirmar Pag.'}
+            </button>
+            <button class="btn-s" onclick="closeDrawer();openEditRevById(${r.id})"><i class="fas fa-pen"></i> Editar</button>
+            <button class="btn-d" onclick="closeDrawer();delRev(${r.id})"><i class="fas fa-trash"></i> Excluir</button>`;
+        document.getElementById('dbg').classList.add('open');
+    } catch(e) {}
+}
+function closeDrawer() { document.getElementById('dbg').classList.remove('open'); }
+
+// ═══════════════════════════════
+//  EQUIPES
+// ═══════════════════════════════
+let celCnt = 0;
+
+async function openTeamModal(id) {
+    document.getElementById('tmTitle').textContent = id ? 'Editar Equipe' : 'Nova Equipe';
+    document.getElementById('tmId').value = id || '';
+    document.getElementById('celsFields').innerHTML = '';
+    celCnt = 0;
+    if (id) {
+        const eqs = await getEquipes();
+        const eq  = eqs.find(e => e.id === id);
+        if (eq) {
+            document.getElementById('tmName').value   = eq.name;
+            document.getElementById('tmLeader').value = eq.leader;
+            document.getElementById('tmColor').value  = eq.color;
+            (eq.celulas||[]).forEach(c => addCelFld(c.nome, c.lider, c.id));
+        }
+    } else {
+        document.getElementById('tmName').value   = '';
+        document.getElementById('tmLeader').value = '';
+        document.getElementById('tmColor').value  = '#1a8fc4';
+    }
+    openModal('teamModal');
+}
+
+function addCelFld(nome='', lider='', celId=null) {
+    const id = ++celCnt;
+    const d  = document.createElement('div');
+    d.id = 'cf'+id;
+    d.dataset.celId = celId || '';   // preserva o ID da célula existente
+    d.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-bottom:7px;align-items:center';
+    d.innerHTML = `
+        <input class="mfi" placeholder="Nome da célula" value="${nome}" style="font-size:.82rem;padding:9px 11px">
+        <input class="mfi" placeholder="Líder" value="${lider}" style="font-size:.82rem;padding:9px 11px">
+        <button type="button" onclick="document.getElementById('cf${id}').remove()"
+            style="width:32px;height:32px;border-radius:6px;border:1px solid rgba(239,68,68,.22);background:rgba(239,68,68,.07);color:var(--red);cursor:pointer;font-size:.82rem">
+            <i class="fas fa-xmark"></i></button>`;
+    document.getElementById('celsFields').appendChild(d);
+}
+
+async function saveTeam() {
+    const id     = document.getElementById('tmId').value;
+    const name   = document.getElementById('tmName').value.trim();
+    const leader = document.getElementById('tmLeader').value.trim();
+    const color  = document.getElementById('tmColor').value;
+    if (!name||!leader) { toast('Nome e líder obrigatórios!','warn'); return; }
+    const celulas = [];
+    document.querySelectorAll('#celsFields>div').forEach(row => {
+        const ins   = row.querySelectorAll('input');
+        const nome  = ins[0].value.trim();
+        const lider = ins[1].value.trim();
+        const celId = row.dataset.celId ? parseInt(row.dataset.celId) : null;
+        if (nome) celulas.push({ id: celId, nome, lider });
+    });
+    try {
+        if (id) await API.put(`/api/equipes/${id}`, {name,leader,color,celulas});
+        else    await API.post('/api/equipes',       {name,leader,color,celulas});
+        closeModal('teamModal');
+        await getEquipes(true);
+        renderTeams(); updateEqFilter();
+        toast('Equipe salva!','ok');
+    } catch(e) {}
+}
+
+async function delTeam(id) {
+    if (!confirm('Excluir esta equipe?')) return;
+    try {
+        await API.delete(`/api/equipes/${id}`);
+        await getEquipes(true);
+        renderTeams(); updateEqFilter();
+        toast('Equipe excluída.','ok');
+    } catch(e) {}
+}
+
+async function renderTeams() {
+    try {
+        const eqs  = await getEquipes(true);
+        const grid  = document.getElementById('teamsGrid');
+        const empty = document.getElementById('teamsEmpty');
+        if (!eqs.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+        empty.style.display = 'none';
+        grid.innerHTML = eqs.map(eq => {
+            const cstats = (eq.celulas||[]).slice().sort((a,b)=>(b.count||0)-(a.count||0));
+            return `<div class="tcard">
+                <div class="tcard-head">
+                    <div class="team-dot" style="background:${eq.color}">${eq.name.substring(0,1)}</div>
+                    <div style="flex:1">
+                        <div class="tcard-name">${eq.name}</div>
+                        <div class="tcard-leader"><i class="fas fa-user-tie"></i>${eq.leader}</div>
+                    </div>
+                    <div style="display:flex;gap:4px">
+                        <button class="abtn edit" onclick="openTeamModal(${eq.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                        <button class="abtn del"  onclick="delTeam(${eq.id})"  title="Excluir"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="tcard-stats">
+                    <div><div class="tsv">${eq.total||0}</div><div class="tsl"><i class="fas fa-users" style="margin-right:3px;font-size:.65rem"></i>Membros</div></div>
+                    <div><div class="tsv">${eq.celulas?.length||0}</div><div class="tsl"><i class="fas fa-layer-group" style="margin-right:3px;font-size:.65rem"></i>Células</div></div>
+                </div>
+                ${cstats.length?`<div class="tcard-cells">
+                    <div class="cell-sec-lbl"><i class="fas fa-layer-group"></i> Células</div>
+                    ${cstats.map(c=>`<div class="crow">
+                        <div><div class="cname">${c.nome}</div><div class="cldr"><i class="fas fa-user"></i>${c.lider||'—'}</div></div>
+                        <div class="ccnt" style="color:${eq.color}">${c.count||0}</div>
+                    </div>`).join('')}
+                </div>`:''}
+            </div>`;
+        }).join('');
+    } catch(e) { console.error('renderTeams:', e); }
+}
+
+// ═══════════════════════════════
+//  RANKING
+// ═══════════════════════════════
+async function renderRanking() {
+    const rv = document.getElementById('rankRV').value;
+    try {
+        const {teams, cells} = await API.get(`/api/ranking?revisao=${rv}`);
+        const maxT = Math.max(1, ...teams.map(t => parseInt(t.total)||0));
+        document.getElementById('rankTeams').innerHTML = teams.length
+            ? teams.map((t,i) => `<div class="rank-item">
+                <div class="rnum ${i===0?'r1':i===1?'r2':i===2?'r3':'ro'}">${i+1}</div>
+                <div class="rinfo"><div class="rname"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${t.color};margin-right:5px"></span>${t.name}</div><div class="rsub"><i class="fas fa-user-tie" style="font-size:.65rem;margin-right:3px"></i>${t.leader}</div></div>
+                <div class="rbar-w"><div class="rbar" style="width:${Math.round((parseInt(t.total)||0)/maxT*100)}%"></div></div>
+                <div class="rcnt">${t.total||0}</div>
+              </div>`).join('')
+            : '<div class="empty"><i class="fas fa-people-group"></i><p>Sem equipes cadastradas</p></div>';
+
+        const maxC = Math.max(1, ...cells.map(c => parseInt(c.total)||0));
+        document.getElementById('rankCells').innerHTML = cells.length
+            ? cells.map((c,i) => `<div class="rank-item">
+                <div class="rnum ${i===0?'r1':i===1?'r2':i===2?'r3':'ro'}">${i+1}</div>
+                <div class="rinfo">
+                    <div class="rname">${c.nome}</div>
+                    <div class="rsub"><i class="fas fa-user" style="font-size:.65rem;margin-right:3px"></i>${c.lider} · <span style="color:${c.equipe_color}">${c.equipe_name}</span></div>
+                </div>
+                <div class="rbar-w"><div class="rbar" style="width:${Math.round((parseInt(c.total)||0)/maxC*100)}%"></div></div>
+                <div class="rcnt">${c.total||0}</div>
+              </div>`).join('')
+            : '<div class="empty"><i class="fas fa-users"></i><p>Sem células cadastradas</p></div>';
+    } catch(e) { console.error('renderRanking:', e); }
+}
+
+// ═══════════════════════════════
+//  USUÁRIOS
+// ═══════════════════════════════
+async function renderUsers() {
+    try {
+        const users = await API.get('/api/usuarios');
+        document.getElementById('usersBody').innerHTML = users.map(u => `<tr>
+            <td><code style="color:#38bdf8;font-size:.82rem">${u.username}</code></td>
+            <td>${u.name}</td>
+            <td><span class="badge ${u.role==='admin'?'b-blue':u.role==='lider'?'b-green':'b-gray'}"><i class="fas fa-${u.role==='admin'?'shield':u.role==='lider'?'user-tie':'eye'}"></i>${u.role}</span></td>
+            <td>${u.id!==1?`<button class="abtn del" onclick="delUser(${u.id})"><i class="fas fa-trash"></i> Excluir</button>`:'<span style="font-size:.73rem;color:var(--muted)"><i class="fas fa-lock" style="margin-right:4px"></i>Principal</span>'}</td>
+        </tr>`).join('');
+    } catch(e) {}
+}
+
+async function saveUser() {
+    const u=document.getElementById('umUser').value.trim();
+    const n=document.getElementById('umName').value.trim();
+    const p=document.getElementById('umPass').value;
+    const r=document.getElementById('umRole').value;
+    if(!u||!n||!p){toast('Preencha todos os campos!','warn');return;}
+    try {
+        await API.post('/api/usuarios',{username:u,name:n,password:p,role:r});
+        closeModal('userModal'); renderUsers(); toast('Usuário criado!','ok');
+    } catch(e) {}
+}
+
+async function delUser(id) {
+    if(!confirm('Excluir usuário?'))return;
+    try { await API.delete(`/api/usuarios/${id}`); renderUsers(); toast('Excluído.','ok'); }
+    catch(e){}
+}
+
+
+
+// ═══════════════════════════════
+//  RELATÓRIOS
+// ═══════════════════════════════
+let _relAnoSelecionado = null;
+let _relDados = [];
+let _relStats  = {};
+let _relRVFilter = 'all';
+
+async function renderRelatorios() {
+    // Descobre quais anos têm dados
+    try {
+        const cfg = await API.get('/api/config');
+        _rvAtiva  = cfg.rv_ativa  || 'RV1';
+        _anoAtivo = parseInt(cfg.ano_ativo || 2026);
+    } catch(e) {}
+
+    // Gera lista de anos de 2026 até o ano ativo
+    const anos = [];
+    for (let a = 2026; a <= _anoAtivo; a++) anos.push(a);
+
+    // Seleciona o último ano por padrão (mais recente relevante = ano ativo - 1 se já finalizou, senão atual)
+    if (!_relAnoSelecionado) _relAnoSelecionado = _anoAtivo;
+
+    // Render tabs de anos
+    const tabs = document.getElementById('anoTabs');
+    tabs.innerHTML = anos.map(a => `
+        <button class="ano-tab ${a === _relAnoSelecionado ? 'active' : ''}" onclick="selectRelAno(${a})">${a}</button>
+    `).join('') + (anos.length === 0 ? '<span style="color:var(--muted);font-size:.82rem">Nenhum ano disponível</span>' : '');
+
+    await loadRelAno(_relAnoSelecionado);
+}
+
+async function selectRelAno(ano) {
+    _relAnoSelecionado = ano;
+    _relRVFilter = 'all';
+    document.querySelectorAll('.ano-tab').forEach(b => b.classList.toggle('active', parseInt(b.textContent) === ano));
+    document.querySelectorAll('.rel-rv-tab').forEach(b => b.classList.toggle('active', b.dataset.rv === 'all'));
+    await loadRelAno(ano);
+}
+
+async function loadRelAno(ano) {
+    try {
+        const [dados, stats] = await Promise.all([
+            API.get(`/api/relatorio/${ano}`),
+            API.get(`/api/relatorio/${ano}/stats`)
+        ]);
+        _relDados  = dados;
+        _relStats  = stats;
+
+        renderRelSummary();
+        renderRelEquipes();
+        renderRelTable();
+    } catch(e) { console.error('loadRelAno:', e); }
+}
+
+function renderRelSummary() {
+    const dados = _relDados;
+    const rvs   = ['RV1','RV2','RV3','RV4'];
+    const stats = _relStats?.por_revisao || [];
+
+    // Totais gerais
+    const total = dados.length;
+    const masc  = dados.filter(r => r.sexo==='Masculino').length;
+    const fem   = dados.filter(r => r.sexo==='Feminino').length;
+
+    // Card geral + cards por RV
+    let html = `
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:.75rem;align-items:stretch">
+            <!-- Card total -->
+            <div class="scard" style="border:1px solid rgba(26,143,196,.25)">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:.8rem">
+                    <div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem"><i class="fas fa-users"></i></div>
+                    <div style="font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Total do Ano</div>
+                </div>
+                <div style="font-size:2.2rem;font-weight:800;color:#fff;line-height:1">${total}</div>
+                <div style="display:flex;gap:.8rem;margin-top:.6rem">
+                    <span style="font-size:.75rem;color:#60a5fa"><i class="fas fa-mars" style="margin-right:3px"></i>${masc}</span>
+                    <span style="font-size:.75rem;color:#f472b6"><i class="fas fa-venus" style="margin-right:3px"></i>${fem}</span>
+                </div>
+            </div>`;
+
+    rvs.forEach(rv => {
+        const s    = stats.find(x => x.revisao === rv);
+        const tot  = parseInt(s?.total||0);
+        const pg   = parseInt(s?.pagos||0);
+        const pct  = tot > 0 ? Math.round(pg/tot*100) : 0;
+        html += `
+            <div class="scard">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+                    <span class="badge b-blue" style="font-size:.68rem"><i class="fas fa-tag"></i>${rv}</span>
+                    <span style="font-size:.68rem;color:var(--muted2)">${pct}% presentes</span>
+                </div>
+                <div style="font-size:1.8rem;font-weight:800;color:#fff;line-height:1">${pg}</div>
+                <div style="font-size:.72rem;color:var(--muted2);margin-top:.4rem">
+                    <i class="fas fa-users" style="color:#38bdf8;margin-right:3px"></i>${tot} inscritos
+                </div>
+                <div style="margin-top:.7rem;height:3px;border-radius:2px;background:rgba(26,143,196,.1)">
+                    <div style="height:100%;border-radius:2px;background:linear-gradient(90deg,#1a8fc4,#38bdf8);width:${pct}%;transition:width .6s"></div>
+                </div>
+            </div>`;
+    });
+
+    html += '</div>';
+    document.getElementById('relSummaryCards').innerHTML = html;
+}
+
+function renderRelEquipes() {
+    const equipes = _relStats?.equipes  || [];
+    const celulas = _relStats?.celulas  || [];
+    const el      = document.getElementById('relEquipes');
+
+    // ── Ranking equipes ──────────────────────────────────────
+    const maxEq = Math.max(1, ...equipes.map(e => parseInt(e.total)||0));
+    document.getElementById('relRankEquipes').innerHTML = equipes.length
+        ? equipes.map((eq, i) => `
+            <div class="rank-item">
+                <div class="rnum ${i===0?'r1':i===1?'r2':i===2?'r3':'ro'}">${i+1}</div>
+                <div class="rinfo">
+                    <div class="rname"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${eq.color};margin-right:6px;flex-shrink:0"></span>${eq.name}</div>
+                </div>
+                <div class="rbar-w"><div class="rbar" style="width:${Math.round(parseInt(eq.total)/maxEq*100)}%;background:${eq.color};opacity:.75"></div></div>
+                <div class="rcnt">${eq.total}</div>
+            </div>`).join('')
+        : '<div class="empty" style="padding:1.5rem"><i class="fas fa-trophy"></i><p>Sem dados</p></div>';
+
+    // ── Ranking células (todas, flat, ordenadas por total) ───
+    const allCels = [...celulas].sort((a,b) => parseInt(b.total)-parseInt(a.total));
+    const maxCel  = Math.max(1, ...allCels.map(c => parseInt(c.total)||0));
+    document.getElementById('relRankCelulas').innerHTML = allCels.length
+        ? allCels.map((c, i) => `
+            <div class="rank-item">
+                <div class="rnum ${i===0?'r1':i===1?'r2':i===2?'r3':'ro'}">${i+1}</div>
+                <div class="rinfo">
+                    <div class="rname">${c.celula_name}</div>
+                    <div class="rsub"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${c.equipe_color};margin-right:4px"></span>${c.equipe_name}</div>
+                </div>
+                <div class="rbar-w"><div class="rbar" style="width:${Math.round(parseInt(c.total)/maxCel*100)}%"></div></div>
+                <div class="rcnt">${c.total}</div>
+            </div>`).join('')
+        : '<div class="empty" style="padding:1.5rem"><i class="fas fa-medal"></i><p>Sem dados</p></div>';
+
+    if (!equipes.length) {
+        el.innerHTML = '<div class="empty" style="padding:1.5rem"><i class="fas fa-people-group"></i><p>Sem equipes neste ano</p></div>';
+        return;
+    }
+
+    const maxTotal = Math.max(1, ...equipes.map(e => parseInt(e.total)||0));
+
+    el.innerHTML = equipes.map((eq, idx) => {
+        const cels = celulas.filter(c => c.equipe_name === eq.name);
+        const uid  = `eq-drop-${idx}`;
+        return `
+        <div style="margin-bottom:.6rem;border:1px solid rgba(26,143,196,.1);border-radius:10px;overflow:hidden">
+            <!-- Cabeçalho clicável -->
+            <div onclick="toggleEqDrop('${uid}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;background:rgba(26,143,196,.04);transition:background .2s"
+                 onmouseover="this.style.background='rgba(26,143,196,.08)'" onmouseout="this.style.background='rgba(26,143,196,.04)'">
+                <div style="width:34px;height:34px;border-radius:8px;background:${eq.color};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:rgba(0,0,0,.75);flex-shrink:0">${eq.name.substring(0,1)}</div>
+                <div style="flex:1">
+                    <div style="font-weight:600;color:#fff;font-size:.88rem">${eq.name}</div>
+                    <div style="font-size:.7rem;color:var(--muted2);margin-top:1px">${cels.length} célula${cels.length!==1?'s':''}</div>
+                </div>
+                <!-- Barra de progresso inline -->
+                <div style="flex:1;max-width:140px">
+                    <div style="height:4px;border-radius:2px;background:rgba(255,255,255,.06)">
+                        <div style="height:100%;border-radius:2px;background:${eq.color};width:${Math.round(parseInt(eq.total)/maxTotal*100)}%;opacity:.8"></div>
+                    </div>
+                </div>
+                <div style="font-size:1.25rem;font-weight:800;color:${eq.color};min-width:36px;text-align:right">${eq.total}</div>
+                <i class="fas fa-chevron-down" id="${uid}-icon" style="color:var(--muted);font-size:.72rem;transition:transform .25s;margin-left:4px"></i>
+            </div>
+            <!-- Células dropdown -->
+            <div id="${uid}" style="display:none;border-top:1px solid rgba(26,143,196,.08)">
+                ${cels.length ? cels.map(c => `
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 14px 9px 62px;border-bottom:1px solid rgba(26,143,196,.05);font-size:.82rem">
+                        <div style="flex:1">
+                            <span style="color:var(--text)">${c.celula_name}</span>
+                            <span style="color:var(--muted2);margin-left:6px;font-size:.74rem"><i class="fas fa-user" style="font-size:.66rem;margin-right:3px"></i>${c.celula_lider}</span>
+                        </div>
+                        <span style="font-weight:700;color:#38bdf8">${c.total}</span>
+                    </div>`).join('')
+                : `<div style="padding:10px 14px 10px 62px;font-size:.8rem;color:var(--muted2)">Sem células registradas</div>`}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleEqDrop(uid) {
+    const el   = document.getElementById(uid);
+    const icon = document.getElementById(uid + '-icon');
+    const open = el.style.display === 'none';
+    el.style.display   = open ? 'block' : 'none';
+    icon.style.transform = open ? 'rotate(180deg)' : 'none';
+}
+
+function filterRelTable(rv) {
+    _relRVFilter = rv;
+    document.querySelectorAll('.rel-rv-tab').forEach(b => b.classList.toggle('active', b.dataset.rv === rv));
+    renderRelTable();
+}
+
+function renderRelTable() {
+    const dados = _relRVFilter === 'all' ? _relDados : _relDados.filter(r => r.revisao === _relRVFilter);
+    const body  = document.getElementById('relBody');
+    const empty = document.getElementById('relEmpty');
+
+    if (!dados.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    body.innerHTML = dados.map((r, i) => `
+        <tr>
+            <td style="color:var(--muted);font-size:.78rem">${i+1}</td>
+            <td><div class="tc-name">${r.nome_completo||'—'}</div><div class="tc-sub">${r.sexo||''} · ${r.data_nascimento||'—'}</div></td>
+            <td><span class="badge b-blue"><i class="fas fa-tag"></i>${r.revisao||'—'}</span></td>
+            <td>
+                ${r.equipe_nome?`<div style="display:flex;align-items:center;gap:5px;font-size:.81rem"><span style="width:7px;height:7px;border-radius:50%;background:${r.equipe_cor||'#888'};flex-shrink:0"></span>${r.equipe_nome}</div>`:'—'}
+                <div class="tc-sub" style="padding-left:12px">${r.celula_nome||'—'}</div>
+            </td>
+            <td><span class="badge ${r.pagamento==='confirmado'?'b-green':'b-yellow'}"><i class="fas fa-${r.pagamento==='confirmado'?'check':'clock'}"></i>${r.pagamento==='confirmado'?'Confirmado':'Pendente'}</span></td>
+            <td style="font-size:.8rem">${r.telefone||'—'}</td>
+            <td style="font-size:.78rem;color:var(--muted2)">${r.data_inscricao?new Date(r.data_inscricao).toLocaleDateString('pt-BR'):'—'}</td>
+        </tr>`).join('');
+}
+
+function exportCSV() {
+    const dados = _relRVFilter === 'all' ? _relDados : _relDados.filter(r => r.revisao === _relRVFilter);
+    if (!dados.length) { toast('Nenhum dado para exportar','warn'); return; }
+
+    const cols = ['nome_completo','cpf','data_nascimento','sexo','telefone','endereco',
+                  'revisao','equipe_nome','celula_nome','lider_ou_convite','pagamento',
+                  'condicao_saude','restricao_alimentar','informacao_filho',
+                  'contatos_emergencia','expectativa','entrou_grupo_whatsapp','data_inscricao'];
+    const header = cols.join(';');
+    const lines  = dados.map(r =>
+        cols.map(c => {
+            const v = r[c] || '';
+            return `"${String(v).replace(/"/g,'""')}"`;
+        }).join(';')
+    );
+    const csv  = [header, ...lines].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `revisao_vidas_${_relAnoSelecionado}_${_relRVFilter}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV exportado!', 'ok');
+}
+
+
+function abrirModalFinalizarAno() {
+    document.getElementById('anoAtualModal').textContent  = _anoAtivo;
+    document.getElementById('anoAtualModal2').textContent = _anoAtivo;
+    document.getElementById('novoAnoModal').textContent   = _anoAtivo + 1;
+    openModal('finalizarAnoModal');
+}
+
+async function executarFinalizarAno() {
+    try {
+        const r = await API.post('/api/ano/finalizar', {});
+        closeModal('finalizarAnoModal');
+
+        // Atualiza globals
+        _anoAtivo = r.novo_ano;
+        _rvAtiva  = 'RV1';
+        ['dashRV','fRV','rankRV'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = 'RV1';
+        });
+
+        toast(`✅ Ano ${r.ano_finalizado} finalizado! Sistema agora em ${r.novo_ano} — RV1.`, 'ok');
+        renderDashboard();
+        renderRanking();
+        renderRevs();
+        renderSite();
+        // Vai para relatórios para ver o ano finalizado
+        _relAnoSelecionado = r.ano_finalizado;
+        showView('relatorios');
+    } catch(e) {}
+}
+
+// ═══════════════════════════════
+//  SITE — Controle da RV Ativa
+// ═══════════════════════════════
+async function renderSite() {
+    try {
+        const cfg = await API.get('/api/config');
+        _rvAtiva  = cfg.rv_ativa  || 'RV1';
+        _anoAtivo = parseInt(cfg.ano_ativo || 2026);
+    } catch(e) {}
+
+    // Atualiza badge principal
+    const rvLabels = {
+        'RV1': { label:'Revisão 1', periodo:'Janeiro — Março' },
+        'RV2': { label:'Revisão 2', periodo:'Abril — Junho' },
+        'RV3': { label:'Revisão 3', periodo:'Julho — Setembro' },
+        'RV4': { label:'Revisão 4', periodo:'Outubro — Dezembro' },
+    };
+    const info = rvLabels[_rvAtiva] || { label: _rvAtiva, periodo:'—' };
+
+    const elAtual = document.getElementById('siteRVAtual');
+    const elDesc  = document.getElementById('siteRVDesc');
+    if (elAtual) elAtual.textContent = info.label;
+    if (elDesc)  elDesc.innerHTML = `
+        <span style="display:inline-flex;align-items:center;gap:7px;background:rgba(26,143,196,.1);
+            border:1px solid rgba(26,143,196,.2);border-radius:20px;padding:5px 13px;
+            font-size:.78rem;color:#38bdf8;margin-bottom:.9rem">
+            <i class="fas fa-circle" style="font-size:.45rem;animation:pulse 2s infinite"></i>
+            Site ativo — inscrições caindo em <strong style="margin-left:2px">${_rvAtiva}</strong>
+        </span><br>
+        <span style="color:var(--muted2)">${info.periodo}</span>
+    `;
+
+    // Botões de seleção
+    document.querySelectorAll('.rv-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.rv === _rvAtiva);
+    });
+
+    // Histórico por RV
+    try {
+        const { rows: stats } = await Promise.resolve(
+            (async () => {
+                const all = ['RV1','RV2','RV3','RV4'];
+                const results = [];
+                for (const rv of all) {
+                    try {
+                        const s = await API.get(`/api/stats?revisao=${rv}`);
+                        results.push({ rv, ...s });
+                    } catch(e) {
+                        results.push({ rv, ativos:0, pagos:0, pendentes:0, arquivados:0 });
+                    }
+                }
+                return { rows: results };
+            })()
+        );
+
+        stats.forEach(s => {
+            const col = document.getElementById(`hist-${s.rv}`);
+            if (!col) return;
+            const isAtiva = s.rv === _rvAtiva;
+            const isFinalizada = parseInt(s.arquivados) > 0 && parseInt(s.ativos) === 0;
+            col.innerHTML = `
+                <div class="rv-hist-lbl">
+                    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;
+                        background:${isAtiva?'#38bdf8':isFinalizada?'#22c55e':'#334155'}"></span>
+                    ${s.rv}
+                    ${isAtiva ? '<span style="font-size:.6rem;background:rgba(26,143,196,.15);color:#38bdf8;padding:1px 7px;border-radius:10px;margin-left:3px">ATIVA</span>' : ''}
+                    ${isFinalizada ? '<span style="font-size:.6rem;background:rgba(34,197,94,.12);color:#22c55e;padding:1px 7px;border-radius:10px;margin-left:3px">FINALIZADA</span>' : ''}
+                </div>
+                <div class="rv-hist-stat">${s.ativos || 0}</div>
+                <div class="rv-hist-sub">ativos · ${s.pagos||0} pagos</div>
+                ${parseInt(s.arquivados)>0 ? `<div class="rv-hist-sub" style="margin-top:4px;color:var(--muted)">${s.arquivados} arquivados</div>` : ''}
+            `;
+        });
+    } catch(e) {}
+}
+
+async function setRVAtiva(rv) {
+    try {
+        await API.put('/api/config', { rv_ativa: rv });
+        _rvAtiva  = rv;
+
+        // Atualiza todos os selects do painel para a nova RV
+        ['dashRV','fRV','rankRV'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = rv;
+        });
+
+        toast(`Site atualizado para ${rv}!`, 'ok');
+        renderSite();
+        renderDashboard();
+        renderRanking();
+    } catch(e) {}
+}
+
+// ═══════════════════════════════
+//  MODAL / TOAST / UTILS
+// ═══════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.mbg').forEach(m =>
+    m.addEventListener('click', function(e){ if(e.target===this) closeModal(this.id); }));
+
+let tTO;
+function toast(msg, type='ok') {
+    const t=document.getElementById('toast');
+    t.className='show t-'+type;
+    t.querySelector('.ti').innerHTML=type==='ok'?'<i class="fas fa-check"></i>':'<i class="fas fa-triangle-exclamation"></i>';
+    document.getElementById('toastMsg').textContent=msg;
+    clearTimeout(tTO); tTO=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function getRV() {
+    const m=new Date().getMonth()+1;
+    return m<=3?'RV1':m<=6?'RV2':m<=9?'RV3':'RV4';
+}
+</script>
+</body>
+</html>
