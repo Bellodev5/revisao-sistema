@@ -10,39 +10,32 @@
 //    (ou: npx nodemon server.js para desenvolvimento)
 // ============================================================
 
-
 require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
 const { Pool } = require('pg');
 const path    = require('path');
 
-
 const app  = express();
 const PORT = process.env.PORT || 3000;
-
 
 // ─── BANCO ───────────────────────────────────────────────────
 const pool = new Pool({
     host:     process.env.DB_HOST || 'localhost',
-    port:     parseInt(process.env.DB_PORT || '5433'),
+    port:     parseInt(process.env.DB_PORT || '5432'),
     user:     process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASS || 'senai',
+    password: process.env.DB_PASS || 'bellopg',
     database: process.env.DB_NAME || 'revisao_vidas',
     ssl:      process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
-
-pool.connect()
-    .then(c => { console.log('✅ PostgreSQL conectado na porta ' + (process.env.DB_PORT||'5432')); c.release(); })
-    .catch(e => console.error('❌ Erro ao conectar:', e.message, '\n   Verifique o .env'));
-
+// Teste de conexão lazy (não bloqueia o start em serverless)
+const q = (sql, params) => pool.query(sql, params);
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 // Log de todas as requisições
 app.use((req, res, next) => {
@@ -50,20 +43,15 @@ app.use((req, res, next) => {
     next();
 });
 
-
 // Serve os arquivos HTML estáticos
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 // Rota de teste rápido
 app.get('/api/ping', (req, res) => res.json({ ok: true, timestamp: new Date().toISOString() }));
 
-
 // ─── HELPER ───────────────────────────────────────────────────
 const ok  = (res, data) => res.json({ success: true,  data });
 const err = (res, msg, code = 400) => res.status(code).json({ success: false, error: msg });
-const q   = (sql, params) => pool.query(sql, params);
-
 
 // ─── AUTH ─────────────────────────────────────────────────────
 // POST /api/auth/login
@@ -80,9 +68,7 @@ app.post('/api/auth/login', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // ─── REVISIONISTAS ────────────────────────────────────────────
-
 
 // POST /api/inscricao  ← chamado pelo site de inscrição público
 app.post('/api/inscricao', async (req, res) => {
@@ -96,9 +82,7 @@ app.post('/api/inscricao', async (req, res) => {
             pagamento   // pode vir quando adicionado manualmente pelo painel
         } = req.body;
 
-
         if (!nome_completo) return err(res, 'Nome é obrigatório');
-
 
         // Detecta revisão automaticamente se não enviada
         const rv = revisao || (() => {
@@ -106,16 +90,13 @@ app.post('/api/inscricao', async (req, res) => {
             return m <= 3 ? 'RV1' : m <= 6 ? 'RV2' : m <= 9 ? 'RV3' : 'RV4';
         })();
 
-
         // equipe_id e celula_id: converte para inteiro ou null
         const eqId  = equipe_id  && !isNaN(equipe_id)  ? parseInt(equipe_id)  : null;
         const celId = celula_id  && !isNaN(celula_id)  ? parseInt(celula_id)  : null;
 
-
         // Busca o ano ativo do banco
         const { rows: cfgRows } = await q("SELECT valor FROM config WHERE chave='ano_ativo'");
         const anoAtivo = cfgRows[0]?.valor ? parseInt(cfgRows[0].valor) : new Date().getFullYear();
-
 
         // Busca snapshot de nome/cor da equipe e célula para preservar histórico
         let eqSnap = null, celSnap = null;
@@ -127,7 +108,6 @@ app.post('/api/inscricao', async (req, res) => {
             const { rows: celRows } = await q('SELECT nome, lider FROM celulas WHERE id=$1', [celId]);
             if (celRows.length) celSnap = celRows[0];
         }
-
 
         const { rows } = await q(`
             INSERT INTO revisionistas
@@ -150,11 +130,9 @@ app.post('/api/inscricao', async (req, res) => {
             ['confirmado','pendente'].includes(pagamento) ? pagamento : 'pendente'
         ]);
 
-
         ok(res, rows[0]);
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // GET /api/revisionistas
 app.get('/api/revisionistas', async (req, res) => {
@@ -174,7 +152,6 @@ app.get('/api/revisionistas', async (req, res) => {
         const params = [];
         let pi = 1;
 
-
         if (revisao  && revisao  !== 'all') { sql += ` AND r.revisao=$${pi++}`;    params.push(revisao); }
         if (pagamento && pagamento !== 'all') { sql += ` AND r.pagamento=$${pi++}`; params.push(pagamento); }
         if (equipe_id && equipe_id !== 'all') { sql += ` AND r.equipe_id=$${pi++}`; params.push(equipe_id); }
@@ -186,25 +163,21 @@ app.get('/api/revisionistas', async (req, res) => {
         }
         sql += ` ORDER BY r.data_inscricao DESC`;
 
-
         const { rows } = await q(sql, params);
         ok(res, rows);
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // POST /api/revisionistas/finalizar  ── arquiva ativos e avança RV
 app.post('/api/revisionistas/finalizar', async (req, res) => {
     try {
         const { revisao } = req.body;
 
-
         // 1. Arquiva revisionistas ativos da revisão informada
         let sql = 'UPDATE revisionistas SET ativo=FALSE WHERE ativo=TRUE';
         const params = [];
         if (revisao && revisao !== 'all') { sql += ' AND revisao=$1'; params.push(revisao); }
         const { rowCount } = await q(sql, params);
-
 
         // 2. Avança a RV ativa automaticamente
         let novaRV = 'RV1';
@@ -220,11 +193,9 @@ app.post('/api/revisionistas/finalizar', async (req, res) => {
         }
         await q("INSERT INTO config (chave, valor) VALUES ('rv_ativa',$1) ON CONFLICT (chave) DO UPDATE SET valor=$1, updated_at=NOW()", [novaRV]);
 
-
         ok(res, { arquivados: rowCount, nova_rv: novaRV });
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // GET /api/revisionistas/:id
 app.get('/api/revisionistas/:id', async (req, res) => {
@@ -244,7 +215,6 @@ app.get('/api/revisionistas/:id', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // PUT /api/revisionistas/:id
 app.put('/api/revisionistas/:id', async (req, res) => {
     try {
@@ -254,7 +224,6 @@ app.put('/api/revisionistas/:id', async (req, res) => {
             informacao_filho, contatos_emergencia, expectativa,
             entrou_grupo_whatsapp, revisao, pagamento, ativo, equipe_id, celula_id
         } = req.body;
-
 
         const { rows } = await q(`
             UPDATE revisionistas SET
@@ -278,7 +247,6 @@ app.put('/api/revisionistas/:id', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // PATCH /api/revisionistas/:id/pagamento
 app.patch('/api/revisionistas/:id/pagamento', async (req, res) => {
     try {
@@ -292,7 +260,6 @@ app.patch('/api/revisionistas/:id/pagamento', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // DELETE /api/revisionistas/:id
 app.delete('/api/revisionistas/:id', async (req, res) => {
     try {
@@ -302,9 +269,7 @@ app.delete('/api/revisionistas/:id', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // ─── EQUIPES ──────────────────────────────────────────────────
-
 
 // GET /api/equipes  (inclui células e contagem)
 app.get('/api/equipes', async (req, res) => {
@@ -316,7 +281,6 @@ app.get('/api/equipes', async (req, res) => {
                    COUNT(*) FILTER (WHERE ativo=TRUE) AS total
             FROM revisionistas GROUP BY equipe_id, celula_id
         `);
-
 
         const result = eqs.map(e => ({
             ...e,
@@ -336,19 +300,16 @@ app.get('/api/equipes', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // POST /api/equipes
 app.post('/api/equipes', async (req, res) => {
     try {
         const { name, leader, color, celulas = [] } = req.body;
         if (!name || !leader) return err(res, 'Nome e líder obrigatórios');
 
-
         const { rows: [eq] } = await q(
             'INSERT INTO equipes (name, leader, color) VALUES ($1,$2,$3) RETURNING *',
             [name, leader, color || '#2563eb']
         );
-
 
         // Inserir células
         for (const c of celulas) {
@@ -358,11 +319,9 @@ app.post('/api/equipes', async (req, res) => {
             );
         }
 
-
         ok(res, eq);
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // PUT /api/equipes/:id
 app.put('/api/equipes/:id', async (req, res) => {
@@ -370,23 +329,19 @@ app.put('/api/equipes/:id', async (req, res) => {
         const { name, leader, color, celulas = [] } = req.body;
         const eqId = req.params.id;
 
-
         const { rows: [eq] } = await q(
             'UPDATE equipes SET name=$1, leader=$2, color=$3 WHERE id=$4 RETURNING *',
             [name, leader, color, eqId]
         );
         if (!eq) return err(res, 'Não encontrado', 404);
 
-
         // Busca células existentes
         const { rows: existentes } = await q(
             'SELECT id, nome FROM celulas WHERE equipe_id=$1', [eqId]
         );
 
-
         // IDs que vieram do frontend (células que devem continuar existindo)
         const idsParaManter = celulas.filter(c => c.id).map(c => parseInt(c.id));
-
 
         // Deleta apenas células que foram removidas pelo usuário (não estão na lista)
         // E que não possuem revisionistas vinculados
@@ -406,7 +361,6 @@ app.put('/api/equipes/:id', async (req, res) => {
             }
         }
 
-
         // Atualiza células existentes (nome/lider pode ter mudado)
         for (const c of celulas) {
             if (c.id) {
@@ -424,11 +378,9 @@ app.put('/api/equipes/:id', async (req, res) => {
             }
         }
 
-
         ok(res, eq);
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // DELETE /api/equipes/:id
 app.delete('/api/equipes/:id', async (req, res) => {
@@ -439,9 +391,7 @@ app.delete('/api/equipes/:id', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // ─── USUÁRIOS ─────────────────────────────────────────────────
-
 
 // GET /api/usuarios
 app.get('/api/usuarios', async (req, res) => {
@@ -450,7 +400,6 @@ app.get('/api/usuarios', async (req, res) => {
         ok(res, rows);
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // POST /api/usuarios
 app.post('/api/usuarios', async (req, res) => {
@@ -468,7 +417,6 @@ app.post('/api/usuarios', async (req, res) => {
     }
 });
 
-
 // DELETE /api/usuarios/:id
 app.delete('/api/usuarios/:id', async (req, res) => {
     try {
@@ -479,16 +427,13 @@ app.delete('/api/usuarios/:id', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // ─── RANKING ──────────────────────────────────────────────────
-
 
 // GET /api/ranking?revisao=RV1
 app.get('/api/ranking', async (req, res) => {
     try {
         const { revisao } = req.query;
         const rvFilter = revisao && revisao !== 'all' ? `AND r.revisao='${revisao}'` : '';
-
 
         const { rows: teams } = await q(`
             SELECT e.id, e.name, e.color, e.leader,
@@ -497,7 +442,6 @@ app.get('/api/ranking', async (req, res) => {
             LEFT JOIN revisionistas r ON r.equipe_id=e.id AND r.ativo=TRUE ${rvFilter}
             GROUP BY e.id ORDER BY total DESC
         `);
-
 
         const { rows: cells } = await q(`
             SELECT c.id, c.nome, c.lider, e.name AS equipe_name, e.color AS equipe_color,
@@ -508,16 +452,12 @@ app.get('/api/ranking', async (req, res) => {
             GROUP BY c.id, c.nome, c.lider, e.name, e.color ORDER BY total DESC
         `);
 
-
         ok(res, { teams, cells });
     } catch(e) { err(res, e.message, 500); }
 });
 
 
-
-
 // ─── CONFIG (RV ATIVA) ────────────────────────────────────────
-
 
 // GET /api/config  — retorna configuração atual
 app.get('/api/config', async (req, res) => {
@@ -530,7 +470,6 @@ app.get('/api/config', async (req, res) => {
         ok(res, cfg);
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // PUT /api/config  — atualiza rv_ativa manualmente
 app.put('/api/config', async (req, res) => {
@@ -552,8 +491,6 @@ app.put('/api/config', async (req, res) => {
 });
 
 
-
-
 // POST /api/ano/finalizar  ── finaliza o ano inteiro, avança o ano
 app.post('/api/ano/finalizar', async (req, res) => {
     try {
@@ -563,23 +500,19 @@ app.post('/api/ano/finalizar', async (req, res) => {
         const anoAtual = parseInt(cfg.ano_ativo || new Date().getFullYear());
         const novoAno  = anoAtual + 1;
 
-
         // 1. Arquiva todos os revisionistas ativos do ano atual
         const { rowCount } = await q(
             'UPDATE revisionistas SET ativo=FALSE WHERE ativo=TRUE AND ano_referencia=$1',
             [anoAtual]
         );
 
-
         // 2. Avança o ano e reseta a RV ativa para RV1
         await q("UPDATE config SET valor=$1, updated_at=NOW() WHERE chave='ano_ativo'", [String(novoAno)]);
         await q("UPDATE config SET valor='RV1', updated_at=NOW() WHERE chave='rv_ativa'");
 
-
         ok(res, { arquivados: rowCount, ano_finalizado: anoAtual, novo_ano: novoAno });
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // GET /api/relatorio/:ano  ── todos os dados de um ano específico
 app.get('/api/relatorio/:ano', async (req, res) => {
@@ -602,7 +535,6 @@ app.get('/api/relatorio/:ano', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // GET /api/relatorio/:ano/stats  ── resumo estatístico de um ano
 app.get('/api/relatorio/:ano/stats', async (req, res) => {
     try {
@@ -620,7 +552,6 @@ app.get('/api/relatorio/:ano/stats', async (req, res) => {
             GROUP BY revisao ORDER BY revisao
         `, [ano]);
 
-
         // Ranking de equipes do ano — usa snapshot para preservar equipes deletadas
         const { rows: equipes } = await q(`
             SELECT
@@ -635,7 +566,6 @@ app.get('/api/relatorio/:ano/stats', async (req, res) => {
                      COALESCE(e.color, r.equipe_cor_snap, '#334155')
             ORDER BY total DESC
         `, [ano]);
-
 
         // Células por equipe do ano (com snapshot)
         const { rows: celulas } = await q(`
@@ -657,11 +587,9 @@ app.get('/api/relatorio/:ano/stats', async (req, res) => {
             ORDER BY equipe_name, total DESC
         `, [ano]);
 
-
         ok(res, { por_revisao: rows, equipes, celulas });
     } catch(e) { err(res, e.message, 500); }
 });
-
 
 // ─── STATS ────────────────────────────────────────────────────
 app.get('/api/stats', async (req, res) => {
@@ -681,7 +609,6 @@ app.get('/api/stats', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-
 // ─── START ────────────────────────────────────────────────────
 app.listen(PORT, () => {
     console.log(`\n🚀 Servidor rodando em http://localhost:${PORT}`);
@@ -689,4 +616,3 @@ app.listen(PORT, () => {
     console.log(`   Painel admin:   http://localhost:${PORT}/painel-admin.html`);
     console.log(`   API:            http://localhost:${PORT}/api/\n`);
 });
-
