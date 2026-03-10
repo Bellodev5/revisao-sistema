@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revisão de Vidas — Sara Itapema</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="shortcut icon" href="logoSara.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -365,7 +364,10 @@
         <div class="hero-img">
             <img src="revisaoGeral.jpeg" alt="Revisão de Vidas"
                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            
+            <div class="hero-img-ph">
+                <i class="fas fa-image" style="font-size:2rem;opacity:.2"></i>
+                <span>revisao_vidas.png</span>
+            </div>
         </div>
     </div>
     <div class="scroll-cue">
@@ -420,7 +422,10 @@
             <div class="gitem"><img src="image1.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image2.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image3.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image4.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image5.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image6.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image1.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image2.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image3.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image4.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image5.png" alt="Revisão de Vidas" loading="lazy"></div><div class="gitem"><img src="image6.png" alt="Revisão de Vidas" loading="lazy"></div>
         </div>
     </div>
-    
+    <p style="color:var(--muted);font-size:.7rem;margin-top:1.2rem;opacity:.5;padding:0 1.5rem">
+        <i class="fas fa-circle-info" style="margin-right:4px"></i>
+        Substitua os placeholders por &lt;img src="..."&gt; com suas fotos reais
+    </p>
 </section>
 
 <div class="div"></div>
@@ -590,8 +595,10 @@ document.querySelectorAll('.reveal').forEach(el=>{
 });
 
 // ── API BASE ─────────────────────────────────────────────────
-const API_PORT = 3000;
-const API_BASE = `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
+// Vercel: mesmo domínio. Local: porta 3000
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? `${window.location.protocol}//${window.location.hostname}:3000`
+    : `${window.location.protocol}//${window.location.host}`;
 const WEBHOOK_BKP = 'https://webhookb2cms.vaidavenda.com.br/webhook/d80428dd-d02b-45d0-a6d5-dd45fdbfc1e0';
 
 // ── CARREGAR EQUIPES DO BANCO ─────────────────────────────────
