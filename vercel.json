@@ -32,6 +32,10 @@
       "dest": "/public/inscricao.html"
     },
     {
+      "src": "/(.*\\.(png|jpeg|jpg|gif|ico|svg|webp))",
+      "dest": "/public/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/public/$1"
     }
