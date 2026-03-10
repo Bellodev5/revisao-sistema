@@ -6,7 +6,6 @@
     <title>Painel — Revisão de Vidas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" href="logoSara.png" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
@@ -533,9 +532,11 @@
         <aside class="sidebar" id="sidebar">
             <div class="sb-head">
                 <div class="sb-logo-wrap">
-                    <img src="logoSara.png" alt="Logo Sara Itapema"
+                    <img src="logo.png" alt="Logo Sara Itapema"
                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                    
+                    <div class="sb-logo-fallback" title="Coloque logo.png na pasta do servidor">
+                        <i class="fas fa-image"></i> logo.png
+                    </div>
                 </div>
                 <div class="sb-name">Revisão de Vidas</div>
                 <div class="sb-sub">Painel Administrativo</div>
@@ -1089,11 +1090,14 @@
 
 <script>
 
+
 // ═══════════════════════════════════════════════════════════
 //  API CLIENT
 // ═══════════════════════════════════════════════════════════
-const API_PORT = 3000; // porta do backend
-const API_BASE = `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
+// Vercel: mesmo domínio. Local: porta 3000
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? `${window.location.protocol}//${window.location.hostname}:3000`
+    : `${window.location.protocol}//${window.location.host}`;
 
 const API = (() => {
     const h = { 'Content-Type': 'application/json' };
@@ -2064,4 +2068,3 @@ function getRV() {
 </script>
 </body>
 </html>
-
