@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel — Revisão de Vidas</title>
+    <title>Painel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="shortcut icon" href="logoSara.png" type="image/x-icon">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -168,6 +170,58 @@
         }
         .scard-val{font-size:1.75rem;font-weight:700;color:#fff;line-height:1}
         .scard-lbl{font-size:.74rem;color:var(--muted);margin-top:.25rem}
+        .scard.clickable{cursor:pointer}
+        .scard.clickable:hover{border-color:rgba(26,143,196,.4);background:rgba(26,143,196,.06);transform:translateY(-2px)}
+        .scard-sub{font-size:.68rem;color:var(--muted);margin-top:.18rem;opacity:.7}
+        .scard-bar{height:4px;border-radius:2px;margin-top:.7rem;background:rgba(255,255,255,.06)}
+        .scard-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+
+        /* GENDER CHART */
+        .dash-row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+        @media(max-width:700px){.dash-row2{grid-template-columns:1fr}}
+        .chart-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem}
+        .chart-title{font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;display:flex;align-items:center;gap:6px}
+        .gender-bars{display:flex;flex-direction:column;gap:.7rem}
+        .gbar-row{display:flex;align-items:center;gap:.7rem}
+        .gbar-lbl{font-size:.78rem;color:#fff;width:80px;flex-shrink:0}
+        .gbar-track{flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden}
+        .gbar-fill{height:100%;border-radius:5px;transition:width .7s ease}
+        .gbar-count{font-size:.78rem;font-weight:700;color:#fff;min-width:28px;text-align:right}
+
+        /* DETAIL MODAL */
+        .detail-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .25s}
+        .detail-modal-ov.open{opacity:1;pointer-events:all}
+        .detail-modal{background:#0b1526;border:1px solid rgba(26,143,196,.2);border-radius:16px;width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+        .detail-modal-head{padding:1.1rem 1.4rem;border-bottom:1px solid rgba(26,143,196,.12);display:flex;align-items:center;justify-content:space-between}
+        .detail-modal-title{font-size:.95rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px}
+        .detail-modal-body{overflow-y:auto;padding:.5rem 0}
+        .detail-item{display:flex;flex-direction:column;gap:2px;padding:.65rem 1.4rem;border-bottom:1px solid rgba(255,255,255,.04)}
+        .detail-item:last-child{border-bottom:none}
+        .detail-name{font-size:.85rem;font-weight:500;color:#fff}
+        .detail-info{font-size:.75rem;color:var(--muted)}
+        .btn-close-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;transition:color .2s}
+        .btn-close-x:hover{color:#fff}
+
+        /* OBREIROS MODAL */
+        .modal-ov2{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .25s}
+        .modal-ov2.open{opacity:1;pointer-events:all}
+        .modal-box2{background:#0b1526;border:1px solid rgba(26,143,196,.2);border-radius:16px;width:100%;max-width:500px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+        .modal-head{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+        .modal-body{overflow-y:auto}
+        .fg2{display:flex;flex-direction:column;gap:.35rem}
+        .flbl2{font-size:.72rem;color:var(--accent-light);font-weight:500;letter-spacing:.04em}
+        .fi2{padding:9px 12px;background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.07);border-radius:8px;color:#d8ecf8;font-family:'Inter',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s}
+        .fi2:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,143,196,.1)}
+
+        /* OBREIRO BADGE */
+        .tbl-btn{width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .2s}
+        .tbl-btn:hover{background:rgba(26,143,196,.15);border-color:rgba(26,143,196,.35);color:#38bdf8}
+        .tbl-btn-red:hover{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.35);color:#f87171}
+        .ob-apto{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all .2s}
+        .ob-apto:hover{opacity:.8;transform:translateY(-1px)}
+        .ob-pendente{background:rgba(234,179,8,.12);color:#eab308;border:1px solid rgba(234,179,8,.25)}
+        .ob-apto-sim{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25)}
+        .ob-inapto{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)}
 
         /* ── VIEWS ── */
         .view{display:none}
@@ -532,11 +586,9 @@
         <aside class="sidebar" id="sidebar">
             <div class="sb-head">
                 <div class="sb-logo-wrap">
-                    <img src="logo.png" alt="Logo Sara Itapema"
+                    <img src="logoSara.png" alt="Logo Sara Itapema"
                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                    <div class="sb-logo-fallback" title="Coloque logo.png na pasta do servidor">
-                        <i class="fas fa-image"></i> logo.png
-                    </div>
+                    
                 </div>
                 <div class="sb-name">Revisão de Vidas</div>
                 <div class="sb-sub">Painel Administrativo</div>
@@ -560,6 +612,9 @@
                 <div class="nav-sec-lbl">Config</div>
                 <div class="nav-item" id="nav-relatorios" onclick="showView('relatorios')">
                     <span class="ni"><i class="fas fa-chart-bar"></i></span> Relatórios
+                </div>
+                <div class="nav-item" id="nav-obreiros" onclick="showView('obreiros')">
+                    <span class="ni"><i class="fas fa-hammer"></i></span> Obreiros
                 </div>
                 <div class="nav-item" id="nav-site" onclick="showView('site')">
                     <span class="ni"><i class="fas fa-globe"></i></span> Site
@@ -604,6 +659,7 @@
                     </div>
                 </div>
                 <div class="stats" id="statsGrid"></div>
+                <div class="dash-row2" id="dashRow2"></div>
                 <div class="grid2">
                     <div class="view-sec">
                         <div class="view-sec-head">
@@ -616,6 +672,17 @@
                             <span><i class="fas fa-trophy"></i> Top Equipes</span>
                         </div>
                         <div id="topTeams"></div>
+                    </div>
+                </div>
+
+                <!-- DETAIL MODAL -->
+                <div class="detail-modal-ov" id="detailModal" onclick="if(event.target===this)closeDetailModal()">
+                    <div class="detail-modal">
+                        <div class="detail-modal-head">
+                            <div class="detail-modal-title" id="detailModalTitle"></div>
+                            <button class="btn-close-x" onclick="closeDetailModal()"><i class="fas fa-xmark"></i></button>
+                        </div>
+                        <div class="detail-modal-body" id="detailModalBody"></div>
                     </div>
                 </div>
             </div>
@@ -718,6 +785,103 @@
             </div>
 
             <!-- ── USUÁRIOS ── -->
+            <!-- ── OBREIROS ── -->
+            <div class="view" id="view-obreiros">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-hammer"></i> Obreiros</div>
+                        <div class="pg-sub" id="obSub">Gerenciar inscrições de obreiros</div>
+                    </div>
+                    <div class="topbar-right">
+                        <select class="fsel-sm" id="obFiltroRV" onchange="renderObreiros()">
+                            <option value="all">Todas as RV</option>
+                            <option value="RV1">RV1</option>
+                            <option value="RV2">RV2</option>
+                            <option value="RV3">RV3</option>
+                            <option value="RV4">RV4</option>
+                        </select>
+                        <select class="fsel-sm" id="obFiltroApto" onchange="renderObreiros()">
+                            <option value="all">Todos os status</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="apto">Apto</option>
+                            <option value="inapto">Inapto</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- STATS OBREIROS -->
+                <div class="stats" id="obStats" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:1.5rem"></div>
+
+                <!-- TABELA -->
+                <div class="view-sec">
+                    <div class="view-sec-head">
+                        <span><i class="fas fa-list"></i> Lista de Obreiros</span>
+                        <input type="text" class="fsearch" id="obSrch" placeholder="&#xf002;  Buscar nome..." oninput="renderObreiros()" style="max-width:220px">
+                    </div>
+                    <div id="obTable"></div>
+                </div>
+            </div>
+
+            <!-- MODAL EDITAR OBREIRO -->
+            <div class="modal-ov2" id="obModal" onclick="if(event.target===this)closeObModal()">
+                <div class="modal-box2">
+                    <div class="modal-head">
+                        <span id="obModalTitle" style="font-weight:600;color:#fff">Editar Obreiro</span>
+                        <button onclick="closeObModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem"><i class="fas fa-xmark"></i></button>
+                    </div>
+                    <div class="modal-body" style="padding:1.2rem 1.4rem;display:flex;flex-direction:column;gap:1rem">
+                        <input type="hidden" id="obEditId">
+                        <div class="fg2">
+                            <label class="flbl2">Nome completo</label>
+                            <input type="text" id="obEditNome" class="fi2">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                            <div class="fg2">
+                                <label class="flbl2">Idade</label>
+                                <input type="number" id="obEditIdade" class="fi2">
+                            </div>
+                            <div class="fg2">
+                                <label class="flbl2">Telefone</label>
+                                <input type="text" id="obEditTel" class="fi2">
+                            </div>
+                        </div>
+                        <div class="fg2">
+                            <label class="flbl2">Endereço</label>
+                            <input type="text" id="obEditEnd" class="fi2">
+                        </div>
+                        <div class="fg2">
+                            <label class="flbl2">Equipe</label>
+                            <input type="text" id="obEditEq" class="fi2">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                            <div class="fg2">
+                                <label class="flbl2">Vai levar filho?</label>
+                                <select id="obEditFilho" class="fi2" style="cursor:pointer">
+                                    <option value="Não">Não</option>
+                                    <option value="Sim">Sim</option>
+                                </select>
+                            </div>
+                            <div class="fg2">
+                                <label class="flbl2">Quantos filhos</label>
+                                <input type="number" id="obEditQtFilhos" class="fi2" min="0">
+                            </div>
+                        </div>
+                        <div class="fg2">
+                            <label class="flbl2">Status (Apto)</label>
+                            <select id="obEditApto" class="fi2" style="cursor:pointer">
+                                <option value="pendente">Pendente — aguardando avaliação</option>
+                                <option value="apto">Apto — confirmado</option>
+                                <option value="inapto">Inapto — não confirmado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:.7rem;justify-content:flex-end">
+                        <button onclick="closeObModal()" class="btn-d" style="background:transparent;border:1px solid var(--border)">Cancelar</button>
+                        <button onclick="saveObreiro()" class="btn-p"><i class="fas fa-save"></i> Salvar</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="view" id="view-usuarios">
                 <div class="topbar">
                     <div>
@@ -1090,7 +1254,6 @@
 
 <script>
 
-
 // ═══════════════════════════════════════════════════════════
 //  API CLIENT
 // ═══════════════════════════════════════════════════════════
@@ -1182,6 +1345,7 @@ function showView(v) {
     if (v === 'usuarios')      renderUsers();
     if (v === 'site')          renderSite();
     if (v === 'relatorios')    renderRelatorios();
+    if (v === 'obreiros')      renderObreiros();
     if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
 }
 function toggleSB() { document.getElementById('sidebar').classList.toggle('open'); }
@@ -1238,22 +1402,158 @@ async function renderDashboard() {
     try {
         const [stats, revs, eqs] = await Promise.all([
             API.get(`/api/stats?revisao=${rv}`),
-            API.get(`/api/revisionistas?ativo=true&revisao=${rv}`),
+            API.get(`/api/revisionistas?ativo=true&revisao=${rv}&limit=999`),
             getEquipes()
         ]);
 
+        // ── calcular métricas extras ──────────────────────────
+        const total   = revs.length;
+        const homens  = revs.filter(r => r.sexo === 'Masculino');
+        const mulheres= revs.filter(r => r.sexo === 'Feminino');
+        const comFilho= revs.filter(r => r.informacao_filho && r.informacao_filho.trim() !== '' && r.informacao_filho.toLowerCase() !== 'não');
+        const comSaude= revs.filter(r =>
+            (r.condicao_saude   && r.condicao_saude.trim()   !== '' && r.condicao_saude.toLowerCase()   !== 'nenhuma' && r.condicao_saude.toLowerCase() !== 'nada' && r.condicao_saude.toLowerCase() !== 'não') ||
+            (r.restricao_alimentar && r.restricao_alimentar.trim() !== '' && r.restricao_alimentar.toLowerCase() !== 'nenhuma' && r.restricao_alimentar.toLowerCase() !== 'nada' && r.restricao_alimentar.toLowerCase() !== 'não')
+        );
+
+        const pctPago = total > 0 ? Math.round((stats.pagos||0)/total*100) : 0;
+
+        // ── statsGrid: 4 cards principais ─────────────────────
         document.getElementById('statsGrid').innerHTML = `
-            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8"><i class="fas fa-users"></i></div></div><div class="scard-val">${stats.ativos||0}</div><div class="scard-lbl">Inscritos Ativos</div></div>
-            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(34,197,94,.1);color:#22c55e"><i class="fas fa-circle-check"></i></div></div><div class="scard-val">${stats.pagos||0}</div><div class="scard-lbl">Pagamentos Confirmados</div></div>
-            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(234,179,8,.1);color:#eab308"><i class="fas fa-clock"></i></div></div><div class="scard-val">${stats.pendentes||0}</div><div class="scard-lbl">Aguardando Pagamento</div></div>
-            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(168,85,247,.1);color:#a855f7"><i class="fas fa-people-group"></i></div></div><div class="scard-val">${stats.equipes||0}</div><div class="scard-lbl">Equipes</div></div>
+            <div class="scard">
+                <div class="scard-top"><div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8"><i class="fas fa-users"></i></div></div>
+                <div class="scard-val">${stats.ativos||0}</div>
+                <div class="scard-lbl">Inscritos Ativos</div>
+            </div>
+            <div class="scard">
+                <div class="scard-top"><div class="scard-ico" style="background:rgba(34,197,94,.1);color:#22c55e"><i class="fas fa-circle-check"></i></div></div>
+                <div class="scard-val">${stats.pagos||0}</div>
+                <div class="scard-lbl">Pagamentos Confirmados</div>
+                <div class="scard-bar"><div class="scard-bar-fill" style="width:${pctPago}%;background:#22c55e"></div></div>
+            </div>
+            <div class="scard">
+                <div class="scard-top"><div class="scard-ico" style="background:rgba(234,179,8,.1);color:#eab308"><i class="fas fa-clock"></i></div></div>
+                <div class="scard-val">${stats.pendentes||0}</div>
+                <div class="scard-lbl">Aguardando Pagamento</div>
+            </div>
+            <div class="scard">
+                <div class="scard-top"><div class="scard-ico" style="background:rgba(168,85,247,.1);color:#a855f7"><i class="fas fa-people-group"></i></div></div>
+                <div class="scard-val">${stats.equipes||0}</div>
+                <div class="scard-lbl">Equipes</div>
+            </div>
         `;
 
-        const recent = revs.slice(0, 6);
+        // ── calcular faixa etária ─────────────────────────────
+        function calcIdade(dataNasc) {
+            if (!dataNasc) return null;
+            // aceita YYYY-MM-DD ou DD/MM/YYYY
+            let d;
+            if (dataNasc.includes('/')) {
+                const [dd,mm,yyyy] = dataNasc.split('/');
+                d = new Date(`${yyyy}-${mm}-${dd}`);
+            } else {
+                d = new Date(dataNasc);
+            }
+            if (isNaN(d)) return null;
+            const hoje = new Date();
+            let idade = hoje.getFullYear() - d.getFullYear();
+            const m = hoje.getMonth() - d.getMonth();
+            if (m < 0 || (m === 0 && hoje.getDate() < d.getDate())) idade--;
+            return idade;
+        }
+
+        const idades = revs.map(r => calcIdade(r.data_nascimento)).filter(i => i !== null);
+        const idadeMedia = idades.length > 0 ? Math.round(idades.reduce((a,b)=>a+b,0)/idades.length) : 0;
+        const adultos = revs.filter(r => { const i = calcIdade(r.data_nascimento); return i !== null && i >= 18; });
+        const adolescentes = revs.filter(r => { const i = calcIdade(r.data_nascimento); return i !== null && i < 18; });
+        const semIdade = revs.filter(r => calcIdade(r.data_nascimento) === null);
+        const pctAdulto = total > 0 ? Math.round(adultos.length/total*100) : 0;
+        const pctAdolesc = total > 0 ? Math.round(adolescentes.length/total*100) : 0;
+
+        // ── dashRow2: gráfico gênero + cards clicáveis ────────
+        const pctH = total > 0 ? Math.round(homens.length/total*100) : 0;
+        const pctM = total > 0 ? Math.round(mulheres.length/total*100) : 0;
+
+        document.getElementById('dashRow2').innerHTML = `
+            <div class="chart-card">
+                <div class="chart-title"><i class="fas fa-chart-bar"></i> Perfil dos Inscritos</div>
+                <div class="gender-bars">
+
+                    <!-- GÊNERO -->
+                    <div style="font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.3rem">Gênero</div>
+                    <div class="gbar-row">
+                        <div class="gbar-lbl"><i class="fas fa-mars" style="color:#60a5fa;margin-right:5px"></i>Homens</div>
+                        <div class="gbar-track"><div class="gbar-fill" style="width:${pctH}%;background:linear-gradient(90deg,#1a8fc4,#60a5fa)"></div></div>
+                        <div class="gbar-count" style="color:#60a5fa">${homens.length}</div>
+                    </div>
+                    <div class="gbar-row">
+                        <div class="gbar-lbl"><i class="fas fa-venus" style="color:#f472b6;margin-right:5px"></i>Mulheres</div>
+                        <div class="gbar-track"><div class="gbar-fill" style="width:${pctM}%;background:linear-gradient(90deg,#be185d,#f472b6)"></div></div>
+                        <div class="gbar-count" style="color:#f472b6">${mulheres.length}</div>
+                    </div>
+                    <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;margin:.6rem 0">
+                        <div style="width:${pctH}%;background:linear-gradient(90deg,#1a8fc4,#60a5fa);transition:width .7s"></div>
+                        <div style="flex:1;background:linear-gradient(90deg,#be185d,#f472b6);transition:width .7s"></div>
+                    </div>
+
+                    <!-- FAIXA ETÁRIA -->
+                    <div style="font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:.6rem 0 .3rem;padding-top:.7rem;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center">
+                        <span>Faixa Etária</span>
+                        <span style="font-size:.72rem;color:#a78bfa;font-weight:600;letter-spacing:0">Idade média: <strong style="color:#c4b5fd">${idadeMedia} anos</strong></span>
+                    </div>
+                    <div class="gbar-row">
+                        <div class="gbar-lbl" style="font-size:.75rem"><i class="fas fa-user" style="color:#a78bfa;margin-right:5px"></i>Adultos</div>
+                        <div class="gbar-track"><div class="gbar-fill" style="width:${pctAdulto}%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div></div>
+                        <div class="gbar-count" style="color:#a78bfa">${adultos.length}</div>
+                    </div>
+                    <div class="gbar-row">
+                        <div class="gbar-lbl" style="font-size:.75rem"><i class="fas fa-person-running" style="color:#34d399;margin-right:5px"></i>Adolesc.</div>
+                        <div class="gbar-track"><div class="gbar-fill" style="width:${pctAdolesc}%;background:linear-gradient(90deg,#059669,#34d399)"></div></div>
+                        <div class="gbar-count" style="color:#34d399">${adolescentes.length}</div>
+                    </div>
+                    <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;margin:.6rem 0 0">
+                        <div style="width:${pctAdulto}%;background:linear-gradient(90deg,#7c3aed,#a78bfa);transition:width .7s"></div>
+                        <div style="width:${pctAdolesc}%;background:linear-gradient(90deg,#059669,#34d399);transition:width .7s"></div>
+                        ${semIdade.length>0?`<div style="flex:1;background:rgba(255,255,255,.06)"></div>`:''}
+                    </div>
+                    ${semIdade.length>0?`<div style="font-size:.67rem;color:var(--muted);margin-top:.35rem"><i class="fas fa-circle-info" style="margin-right:3px"></i>${semIdade.length} sem data de nascimento</div>`:''}
+
+                    <!-- TOTAIS -->
+                    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:.6rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.06)">
+                        <span>Total: <strong style="color:#fff">${total}</strong></span>
+                        <span style="color:#60a5fa">${pctH}% masc · <span style="color:#f472b6">${pctM}% fem</span></span>
+                        <span style="color:#a78bfa">${pctAdulto}% adultos</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1rem">
+                <div class="scard clickable" onclick="openDetailModal('filhos', ${JSON.stringify(comFilho).replace(/"/g,'&quot;')})">
+                    <div class="scard-top">
+                        <div class="scard-ico" style="background:rgba(251,146,60,.1);color:#fb923c"><i class="fas fa-child-reaching"></i></div>
+                        <span style="font-size:.65rem;color:var(--muted);background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.2);padding:2px 8px;border-radius:20px">Clique p/ ver</span>
+                    </div>
+                    <div class="scard-val">${comFilho.length}</div>
+                    <div class="scard-lbl">Com Filhos</div>
+                    <div class="scard-sub">${total>0?Math.round(comFilho.length/total*100):0}% dos inscritos</div>
+                </div>
+                <div class="scard clickable" onclick="openDetailModal('saude', ${JSON.stringify(comSaude).replace(/"/g,'&quot;')})">
+                    <div class="scard-top">
+                        <div class="scard-ico" style="background:rgba(248,113,113,.1);color:#f87171"><i class="fas fa-heart-pulse"></i></div>
+                        <span style="font-size:.65rem;color:var(--muted);background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);padding:2px 8px;border-radius:20px">Clique p/ ver</span>
+                    </div>
+                    <div class="scard-val">${comSaude.length}</div>
+                    <div class="scard-lbl">Condição de Saúde / Alergia</div>
+                    <div class="scard-sub">${total>0?Math.round(comSaude.length/total*100):0}% dos inscritos</div>
+                </div>
+            </div>
+        `;
+
+        // ── listas recentes e top equipes ─────────────────────
+        const recent = [...revs].sort((a,b)=>new Date(b.data_inscricao)-new Date(a.data_inscricao)).slice(0,6);
         document.getElementById('recentList').innerHTML = recent.length
             ? recent.map(r => `
                 <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(26,143,196,.1)">
-                    <div style="width:32px;height:32px;border-radius:50%;background:rgba(26,143,196,.12);border:1px solid rgba(26,143,196,.2);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:#38bdf8;font-weight:700;flex-shrink:0">${(r.nome_completo||'??').substring(0,2).toUpperCase()}</div>
+                    <div style="width:32px;height:32px;border-radius:50%;background:${r.sexo==='Feminino'?'rgba(244,114,182,.12)':'rgba(26,143,196,.12)'};border:1px solid ${r.sexo==='Feminino'?'rgba(244,114,182,.2)':'rgba(26,143,196,.2)'};display:flex;align-items:center;justify-content:center;font-size:.72rem;color:${r.sexo==='Feminino'?'#f472b6':'#38bdf8'};font-weight:700;flex-shrink:0">${(r.nome_completo||'??').substring(0,2).toUpperCase()}</div>
                     <div style="flex:1;min-width:0">
                         <div style="font-size:.83rem;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nome_completo||'—'}</div>
                         <div style="font-size:.7rem;color:var(--muted2);display:flex;align-items:center;gap:4px"><i class="fas fa-user-tie" style="font-size:.64rem"></i> ${r.lider_ou_convite||r.equipe_nome||'—'}</div>
@@ -1264,17 +1564,191 @@ async function renderDashboard() {
 
         const topTeams = eqs.map(e => ({name:e.name,color:e.color,count:e.total||0}))
             .sort((a,b) => b.count-a.count).slice(0,5);
+        const maxT = topTeams[0]?.count || 1;
         document.getElementById('topTeams').innerHTML = topTeams.length
             ? topTeams.map((t,i) => `
                 <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(26,143,196,.1)">
                     <div style="width:26px;height:26px;border-radius:6px;background:${t.color};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.72rem;color:rgba(0,0,0,.7)">${i+1}</div>
-                    <div style="flex:1;font-size:.83rem;font-weight:500;color:#fff">${t.name}</div>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:.83rem;font-weight:500;color:#fff">${t.name}</div>
+                        <div style="height:3px;border-radius:2px;margin-top:4px;background:rgba(255,255,255,.06)"><div style="height:100%;border-radius:2px;background:${t.color};width:${Math.round(t.count/maxT*100)}%;opacity:.7;transition:width .6s"></div></div>
+                    </div>
                     <div style="font-weight:700;color:#38bdf8;font-size:.9rem">${t.count}</div>
                 </div>`).join('')
             : '<div class="empty"><i class="fas fa-people-group"></i><p>Sem equipes</p></div>';
 
         document.getElementById('navCount').textContent = stats.ativos || 0;
     } catch(e) { console.error('Dashboard:', e); }
+}
+
+function openDetailModal(tipo, lista) {
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('detailModalTitle');
+    const body  = document.getElementById('detailModalBody');
+
+    if (tipo === 'filhos') {
+        title.innerHTML = '<i class="fas fa-child-reaching" style="color:#fb923c"></i> Inscritos com Filhos';
+        body.innerHTML = lista.length ? lista.map(r => `
+            <div class="detail-item">
+                <div class="detail-name">${r.nome_completo}</div>
+                <div class="detail-info"><i class="fas fa-child" style="margin-right:4px;color:#fb923c"></i>${r.informacao_filho}</div>
+            </div>`).join('') : '<div class="empty"><p>Nenhum</p></div>';
+    } else {
+        title.innerHTML = '<i class="fas fa-heart-pulse" style="color:#f87171"></i> Condições de Saúde / Alergias';
+        body.innerHTML = lista.length ? lista.map(r => {
+            const partes = [];
+            if (r.condicao_saude && r.condicao_saude.trim() && !['não','nada','nenhuma'].includes(r.condicao_saude.toLowerCase()))
+                partes.push(`<span style="color:#fca5a5"><i class="fas fa-heart-pulse" style="margin-right:3px"></i>${r.condicao_saude}</span>`);
+            if (r.restricao_alimentar && r.restricao_alimentar.trim() && !['não','nada','nenhuma'].includes(r.restricao_alimentar.toLowerCase()))
+                partes.push(`<span style="color:#fdba74"><i class="fas fa-utensils" style="margin-right:3px"></i>${r.restricao_alimentar}</span>`);
+            return `<div class="detail-item">
+                <div class="detail-name">${r.nome_completo}</div>
+                <div class="detail-info" style="display:flex;flex-direction:column;gap:3px">${partes.join('')}</div>
+            </div>`;
+        }).join('') : '<div class="empty"><p>Nenhum</p></div>';
+    }
+
+    modal.classList.add('open');
+}
+
+function closeDetailModal() {
+    document.getElementById('detailModal').classList.remove('open');
+}
+
+// ═══════════════════════════════
+//  OBREIROS
+// ═══════════════════════════════
+async function renderObreiros() {
+    const rv    = document.getElementById('obFiltroRV').value;
+    const apto  = document.getElementById('obFiltroApto').value;
+    const srch  = (document.getElementById('obSrch')?.value || '').toLowerCase();
+
+    try {
+        let url = `/api/obreiros?ativo=true`;
+        if (rv   !== 'all') url += `&revisao=${rv}`;
+        const r = await API.get(url);
+        let lista = r;
+        if (apto !== 'all') lista = lista.filter(o => o.apto === apto);
+        if (srch) lista = lista.filter(o => (o.nome_completo||'').toLowerCase().includes(srch));
+
+        // stats
+        const total    = lista.length;
+        const aptos    = lista.filter(o => o.apto === 'apto').length;
+        const inaptos  = lista.filter(o => o.apto === 'inapto').length;
+        const pendentes= lista.filter(o => o.apto === 'pendente').length;
+        const comFilho = lista.filter(o => o.vai_levar_filho === 'Sim').length;
+
+        document.getElementById('obStats').innerHTML = `
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8"><i class="fas fa-hammer"></i></div></div><div class="scard-val">${total}</div><div class="scard-lbl">Total Inscritos</div></div>
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(34,197,94,.1);color:#22c55e"><i class="fas fa-circle-check"></i></div></div><div class="scard-val">${aptos}</div><div class="scard-lbl">Aptos</div></div>
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(234,179,8,.1);color:#eab308"><i class="fas fa-clock"></i></div></div><div class="scard-val">${pendentes}</div><div class="scard-lbl">Pendentes</div></div>
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(248,113,113,.1);color:#f87171"><i class="fas fa-xmark-circle"></i></div></div><div class="scard-val">${inaptos}</div><div class="scard-lbl">Inaptos</div></div>
+            <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(251,146,60,.1);color:#fb923c"><i class="fas fa-child-reaching"></i></div></div><div class="scard-val">${comFilho}</div><div class="scard-lbl">Levam Filhos</div></div>
+        `;
+        document.getElementById('obSub').textContent = `${total} obreiro${total!==1?'s':''} encontrado${total!==1?'s':''}`;
+
+        if (!lista.length) {
+            document.getElementById('obTable').innerHTML = '<div class="empty"><i class="fas fa-hammer"></i><p>Nenhum obreiro encontrado</p></div>';
+            return;
+        }
+
+        document.getElementById('obTable').innerHTML = `
+            <table class="rev-table" style="width:100%;border-collapse:collapse">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border)">
+                        <th style="padding:9px 14px;text-align:left;font-size:.72rem;color:var(--muted);font-weight:500">Nome</th>
+                        <th style="padding:9px 14px;text-align:left;font-size:.72rem;color:var(--muted);font-weight:500">Equipe</th>
+                        <th style="padding:9px 14px;text-align:center;font-size:.72rem;color:var(--muted);font-weight:500">Idade</th>
+                        <th style="padding:9px 14px;text-align:center;font-size:.72rem;color:var(--muted);font-weight:500">Filho</th>
+                        <th style="padding:9px 14px;text-align:center;font-size:.72rem;color:var(--muted);font-weight:500">Status</th>
+                        <th style="padding:9px 14px;text-align:center;font-size:.72rem;color:var(--muted);font-weight:500">RV</th>
+                        <th style="padding:9px 14px;text-align:center;font-size:.72rem;color:var(--muted);font-weight:500">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${lista.map(o => {
+                        const aptoClass = o.apto==='apto' ? 'ob-apto-sim' : o.apto==='inapto' ? 'ob-inapto' : 'ob-pendente';
+                        const aptoIcon  = o.apto==='apto' ? '<i class="fas fa-circle-check"></i>' : o.apto==='inapto' ? '<i class="fas fa-circle-xmark"></i>' : '<i class="fas fa-clock"></i>';
+                        const aptoLbl   = o.apto==='apto' ? 'Apto' : o.apto==='inapto' ? 'Inapto' : 'Pendente';
+                        const dataReg   = o.data_inscricao ? new Date(o.data_inscricao).toLocaleDateString('pt-BR') : '—';
+                        return `<tr style="border-bottom:1px solid rgba(26,143,196,.07);transition:background .15s" onmouseover="this.style.background='rgba(26,143,196,.04)'" onmouseout="this.style.background=''">
+                            <td style="padding:10px 14px">
+                                <div style="font-size:.83rem;font-weight:500;color:#fff">${o.nome_completo}</div>
+                                <div style="font-size:.7rem;color:var(--muted2)">${o.telefone||'—'} · ${dataReg}</div>
+                            </td>
+                            <td style="padding:10px 14px;font-size:.8rem;color:var(--text)">${o.equipe_texto||o.equipe_nome||'—'}</td>
+                            <td style="padding:10px 14px;text-align:center;font-size:.82rem;color:#fff">${o.idade||'—'}</td>
+                            <td style="padding:10px 14px;text-align:center;font-size:.8rem;color:var(--text)">
+                                ${o.vai_levar_filho==='Sim' ? `<span style="color:#fb923c"><i class="fas fa-child"></i> ${o.quantos_filhos||1}</span>` : '<span style="color:var(--muted)">—</span>'}
+                            </td>
+                            <td style="padding:10px 14px;text-align:center">
+                                <button class="ob-apto ${aptoClass}" onclick="toggleAptoObreiro(${o.id}, '${o.apto}')">${aptoIcon} ${aptoLbl}</button>
+                            </td>
+                            <td style="padding:10px 14px;text-align:center">
+                                <span class="badge b-blue" style="font-size:.68rem">${o.revisao}</span>
+                            </td>
+                            <td style="padding:10px 14px;text-align:center;display:flex;gap:.4rem;justify-content:center">
+                                <button class="tbl-btn" onclick="openObModal(${JSON.stringify(o).replace(/"/g,'&quot;')})" title="Editar"><i class="fas fa-pencil"></i></button>
+                                <button class="tbl-btn tbl-btn-red" onclick="deleteObreiro(${o.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>`;
+    } catch(e) { console.error('Obreiros:', e); }
+}
+
+async function toggleAptoObreiro(id, atual) {
+    const ordem = ['pendente','apto','inapto'];
+    const proximo = ordem[(ordem.indexOf(atual)+1) % ordem.length];
+    try {
+        await API.patch(`/api/obreiros/${id}/apto`, { apto: proximo });
+        renderObreiros();
+    } catch(e) { alert('Erro ao atualizar status'); }
+}
+
+function openObModal(ob) {
+    document.getElementById('obEditId').value    = ob.id;
+    document.getElementById('obEditNome').value  = ob.nome_completo || '';
+    document.getElementById('obEditIdade').value = ob.idade || '';
+    document.getElementById('obEditTel').value   = ob.telefone || '';
+    document.getElementById('obEditEnd').value   = ob.endereco || '';
+    document.getElementById('obEditEq').value    = ob.equipe_texto || ob.equipe_nome || '';
+    document.getElementById('obEditFilho').value = ob.vai_levar_filho || 'Não';
+    document.getElementById('obEditQtFilhos').value = ob.quantos_filhos || 0;
+    document.getElementById('obEditApto').value  = ob.apto || 'pendente';
+    document.getElementById('obModal').classList.add('open');
+}
+
+function closeObModal() {
+    document.getElementById('obModal').classList.remove('open');
+}
+
+async function saveObreiro() {
+    const id = document.getElementById('obEditId').value;
+    const data = {
+        nome_completo:   document.getElementById('obEditNome').value,
+        idade:           document.getElementById('obEditIdade').value,
+        telefone:        document.getElementById('obEditTel').value,
+        endereco:        document.getElementById('obEditEnd').value,
+        equipe_texto:    document.getElementById('obEditEq').value,
+        vai_levar_filho: document.getElementById('obEditFilho').value,
+        quantos_filhos:  document.getElementById('obEditQtFilhos').value,
+        apto:            document.getElementById('obEditApto').value,
+    };
+    try {
+        await API.put(`/api/obreiros/${id}`, data);
+        closeObModal();
+        renderObreiros();
+    } catch(e) { alert('Erro ao salvar: ' + e.message); }
+}
+
+async function deleteObreiro(id) {
+    if (!confirm('Excluir este obreiro?')) return;
+    try {
+        await API.delete(`/api/obreiros/${id}`);
+        renderObreiros();
+    } catch(e) { alert('Erro ao excluir'); }
 }
 
 // ═══════════════════════════════
