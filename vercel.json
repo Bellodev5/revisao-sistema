@@ -17,11 +17,45 @@
     },
     {
       "src": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "obreirosrv.saraitapema.com.br"
+        }
+      ],
+      "dest": "/public/obreiros.html"
+    },
+    {
+      "src": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "inscricaorv.saraitapema.com.br"
+        }
+      ],
+      "dest": "/public/inscricao.html"
+    },
+    {
+      "src": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "painelrv.saraitapema.com.br"
+        }
+      ],
+      "dest": "/public/painel-admin.html"
+    },
+    {
+      "src": "/",
       "dest": "/public/inscricao.html"
     },
     {
       "src": "/painel",
       "dest": "/public/painel-admin.html"
+    },
+    {
+      "src": "/obreiros",
+      "dest": "/public/obreiros.html"
     },
     {
       "src": "/painel-admin.html",
@@ -30,6 +64,10 @@
     {
       "src": "/inscricao.html",
       "dest": "/public/inscricao.html"
+    },
+    {
+      "src": "/obreiros.html",
+      "dest": "/public/obreiros.html"
     },
     {
       "src": "/(.*\\.(png|jpeg|jpg|gif|ico|svg|webp))",
