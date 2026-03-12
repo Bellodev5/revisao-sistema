@@ -1,13 +1,5 @@
 // ============================================================
 //  REVISÃO DE VIDAS — API Backend
-//  Node.js + Express + PostgreSQL
-//
-//  Instalar dependências:
-//    npm install express cors pg dotenv
-//
-//  Rodar:
-//    node server.js
-//    (ou: npx nodemon server.js para desenvolvimento)
 // ============================================================
 
 require('dotenv').config();
@@ -21,12 +13,12 @@ const PORT = process.env.PORT || 3000;
 
 // ─── BANCO ───────────────────────────────────────────────────
 const pool = new Pool({
-  host:'38.52.128.131',
-  port:5433,
-  database:'revisao_vidas',
-  user:'vai',
-  password:'Vai_2025',
-  ssl:process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+    host:     process.env.DB_HOST,
+    port:     parseInt(process.env.DB_PORT || '5433'),
+    database: process.env.DB_NAME,
+    user:     process.env.DB_USER,
+    password: process.env.DB_PASS,
+    ssl:      process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
 // Teste de conexão lazy (não bloqueia o start em serverless)
@@ -48,6 +40,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Rota de teste rápido
 app.get('/api/ping', (req, res) => res.json({ ok: true, timestamp: new Date().toISOString() }));
+
+// ensure co_lider column exists
+(async () => {
+    try {
+        await q(`ALTER TABLE celulas ADD COLUMN IF NOT EXISTS co_lider VARCHAR(200)`);
+    } catch(e) { /* ignore */ }
+})();
 
 // ─── HELPER ───────────────────────────────────────────────────
 const ok  = (res, data) => res.json({ success: true,  data });
@@ -396,7 +395,7 @@ app.delete('/api/equipes/:id', async (req, res) => {
 // GET /api/usuarios
 app.get('/api/usuarios', async (req, res) => {
     try {
-        const { rows } = await q('SELECT id, username, name, role, ativo, created_at FROM usuarios ORDER BY id');
+        const { rows } = await q('SELECT u.id, u.username, u.name, u.role, u.equipe_id, e.name AS equipe_nome, u.ativo, u.created_at FROM usuarios u LEFT JOIN equipes e ON e.id=u.equipe_id ORDER BY u.id');
         ok(res, rows);
     } catch(e) { err(res, e.message, 500); }
 });
@@ -404,11 +403,11 @@ app.get('/api/usuarios', async (req, res) => {
 // POST /api/usuarios
 app.post('/api/usuarios', async (req, res) => {
     try {
-        const { username, name, password, role } = req.body;
+        const { username, name, password, role, equipe_id } = req.body;
         if (!username || !name || !password) return err(res, 'Campos obrigatórios faltando');
         const { rows } = await q(
-            'INSERT INTO usuarios (username, name, password, role) VALUES ($1,$2,$3,$4) RETURNING id, username, name, role',
-            [username, name, password, role || 'viewer']
+            'INSERT INTO usuarios (username, name, password, role, equipe_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, username, name, role',
+            [username, name, password, role || 'viewer', equipe_id || null]
         );
         ok(res, rows[0]);
     } catch(e) {
@@ -424,6 +423,152 @@ app.delete('/api/usuarios/:id', async (req, res) => {
         const { rows } = await q('DELETE FROM usuarios WHERE id=$1 RETURNING id', [req.params.id]);
         if (!rows.length) return err(res, 'Não encontrado', 404);
         ok(res, { deleted: rows[0].id });
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// ─── PORTAL LÍDERES ──────────────────────────────────────────
+
+// POST /api/lideres/login
+app.post('/api/lideres/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) return err(res, 'Usuário e senha obrigatórios');
+        const { rows } = await q(
+            `SELECT u.id, u.username, u.name, u.role, u.equipe_id,
+                    e.name AS equipe_nome, e.color AS equipe_cor
+             FROM usuarios u
+             LEFT JOIN equipes e ON e.id = u.equipe_id
+             WHERE u.username=$1 AND u.password=$2 AND u.ativo=TRUE AND u.role='lider'`,
+            [username, password]
+        );
+        if (!rows.length) return err(res, 'Credenciais inválidas', 401);
+        ok(res, rows[0]);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// GET /api/lideres/:equipe_id/inscritos
+app.get('/api/lideres/:equipe_id/inscritos', async (req, res) => {
+    try {
+        const cfg = await q("SELECT chave, valor FROM config WHERE chave IN ('rv_ativa','ano_ativo')");
+        const cfgMap = Object.fromEntries(cfg.rows.map(r => [r.chave, r.valor]));
+        const rv  = req.query.revisao || cfgMap.rv_ativa || 'RV1';
+        const ano = parseInt(req.query.ano || cfgMap.ano_ativo || new Date().getFullYear());
+
+        const { rows } = await q(
+            `SELECT id, nome_completo, sexo, data_nascimento, telefone,
+                    celula_id, celula_nome_snap, celula_lider_snap,
+                    pagamento, condicao_saude, restricao_alimentar, informacao_filho,
+                    lider_ou_convite, contatos_emergencia, expectativa, entrou_grupo_whatsapp,
+                    data_inscricao
+             FROM revisionistas
+             WHERE equipe_id=$1 AND revisao=$2 AND ano_referencia=$3 AND ativo=TRUE
+             ORDER BY nome_completo`,
+            [req.params.equipe_id, rv, ano]
+        );
+        ok(res, rows);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// GET /api/lideres/:equipe_id/obreiros
+app.get('/api/lideres/:equipe_id/obreiros', async (req, res) => {
+    try {
+        const cfg = await q("SELECT chave, valor FROM config WHERE chave IN ('rv_ativa','ano_ativo')");
+        const cfgMap = Object.fromEntries(cfg.rows.map(r => [r.chave, r.valor]));
+        const rv  = req.query.revisao || cfgMap.rv_ativa || 'RV1';
+        const ano = parseInt(req.query.ano || cfgMap.ano_ativo || new Date().getFullYear());
+
+        const { rows } = await q(
+            `SELECT id, nome_completo, idade, telefone, vai_levar_filho, quantos_filhos, apto, observacao
+             FROM obreiros
+             WHERE equipe_id=$1 AND revisao=$2 AND ano_referencia=$3 AND ativo=TRUE
+             ORDER BY nome_completo`,
+            [req.params.equipe_id, rv, ano]
+        );
+        ok(res, rows);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// POST /api/celulas  (criar)
+app.post('/api/celulas', async (req, res) => {
+    try {
+        const { nome, lider, co_lider, equipe_id } = req.body;
+        if (!nome || !equipe_id) return err(res, 'nome e equipe_id obrigatórios');
+        const { rows } = await q(
+            `INSERT INTO celulas (nome, lider, co_lider, equipe_id) VALUES ($1,$2,$3,$4) RETURNING *`,
+            [nome, lider||null, co_lider||null, equipe_id]
+        );
+        ok(res, rows[0]);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// PUT /api/celulas/:id  (editar)
+app.put('/api/celulas/:id', async (req, res) => {
+    try {
+        const { nome, lider, co_lider } = req.body;
+        const { rows } = await q(
+            `UPDATE celulas SET nome=COALESCE($1,nome), lider=$2, co_lider=$3 WHERE id=$4 RETURNING *`,
+            [nome, lider||null, co_lider||null, req.params.id]
+        );
+        if (!rows.length) return err(res, 'Célula não encontrada', 404);
+        ok(res, rows[0]);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// DELETE /api/celulas/:id
+app.delete('/api/celulas/:id', async (req, res) => {
+    try {
+        // desvincular inscritos primeiro
+        await q(`UPDATE revisionistas SET celula_id=NULL WHERE celula_id=$1`, [req.params.id]);
+        await q(`DELETE FROM celulas WHERE id=$1`, [req.params.id]);
+        ok(res, { deleted: true });
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// GET /api/lideres/:equipe_id/celulas
+app.get('/api/lideres/:equipe_id/celulas', async (req, res) => {
+    try {
+        const { rows } = await q(
+            'SELECT id, nome, lider FROM celulas WHERE equipe_id=$1 ORDER BY nome',
+            [req.params.equipe_id]
+        );
+        ok(res, rows);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// PATCH /api/lideres/inscritos/:id/pagamento
+app.patch('/api/lideres/inscritos/:id/pagamento', async (req, res) => {
+    try {
+        const { pagamento } = req.body;
+        if (!['pendente','confirmado'].includes(pagamento)) return err(res, 'Status inválido');
+        const { rows } = await q(
+            'UPDATE revisionistas SET pagamento=$1 WHERE id=$2 RETURNING id, pagamento',
+            [pagamento, req.params.id]
+        );
+        if (!rows.length) return err(res, 'Não encontrado', 404);
+        ok(res, rows[0]);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// PUT /api/lideres/inscritos/:id
+app.put('/api/lideres/inscritos/:id', async (req, res) => {
+    try {
+        const { nome_completo, telefone, condicao_saude, restricao_alimentar, informacao_filho, celula_id, celula_nome_snap, celula_lider_snap } = req.body;
+        const { rows } = await q(
+            `UPDATE revisionistas SET
+                nome_completo=COALESCE($1,nome_completo),
+                telefone=COALESCE($2,telefone),
+                condicao_saude=$3,
+                restricao_alimentar=$4,
+                informacao_filho=$5,
+                celula_id=COALESCE($6,celula_id),
+                celula_nome_snap=COALESCE($7,celula_nome_snap),
+                celula_lider_snap=COALESCE($8,celula_lider_snap)
+             WHERE id=$9 RETURNING id, nome_completo, pagamento, celula_id, celula_nome_snap`,
+            [nome_completo, telefone, condicao_saude||null, restricao_alimentar||null, informacao_filho||null,
+             celula_id||null, celula_nome_snap||null, celula_lider_snap||null, req.params.id]
+        );
+        if (!rows.length) return err(res, 'Não encontrado', 404);
+        ok(res, rows[0]);
     } catch(e) { err(res, e.message, 500); }
 });
 
@@ -721,7 +866,6 @@ app.post('/api/obreiros/finalizar', async (req, res) => {
 // ─── START ────────────────────────────────────────────────────
 app.listen(PORT, () => {
     console.log(`\n🚀 Servidor rodando em http://localhost:${PORT}`);
-    console.log(`   Site inscrição: http://localhost:${PORT}/inscricao.html`);
-    console.log(`   Painel admin:   http://localhost:${PORT}/painel-admin.html`);
+    
     console.log(`   API:            http://localhost:${PORT}/api/\n`);
 });
