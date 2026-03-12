@@ -47,6 +47,16 @@
     },
     {
       "src": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "lideresrv.saraitapema.com.br"
+        }
+      ],
+      "dest": "/public/lideres.html"
+    },
+    {
+      "src": "/",
       "dest": "/public/inscricao.html"
     },
     {
@@ -56,6 +66,10 @@
     {
       "src": "/obreiros",
       "dest": "/public/obreiros.html"
+    },
+    {
+      "src": "/lideres",
+      "dest": "/public/lideres.html"
     },
     {
       "src": "/painel-admin.html",
@@ -68,6 +82,10 @@
     {
       "src": "/obreiros.html",
       "dest": "/public/obreiros.html"
+    },
+    {
+      "src": "/lideres.html",
+      "dest": "/public/lideres.html"
     },
     {
       "src": "/(.*\\.(png|jpeg|jpg|gif|ico|svg|webp))",
