@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel</title>
+    <title>Painel — Revisão de Vidas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="shortcut icon" href="logoSara.png" type="image/x-icon">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -487,7 +486,6 @@
         #toast.t-ok .ti{background:rgba(34,197,94,.15);color:var(--green)}
         #toast.t-warn .ti{background:rgba(234,179,8,.15);color:var(--yellow)}
 
-
         .rv-btn{
             padding:8px 20px;border-radius:7px;
             border:1px solid rgba(26,143,196,.2);
@@ -785,6 +783,30 @@
             </div>
 
             <!-- ── USUÁRIOS ── -->
+            <div class="view" id="view-usuarios">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-user-gear"></i> Usuários</div>
+                        <div class="pg-sub">Gerenciar acessos ao painel</div>
+                    </div>
+                    <button class="btn-p" onclick="openModal('userModal')"><i class="fas fa-plus"></i>
+                    Novo Usuário</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-at"></i> Usuário</th>
+                                <th><i class="fas fa-id-badge"></i> Nome</th>
+                                <th><i class="fas fa-shield"></i> Perfil</th>
+                                <th><i class="fas fa-sliders"></i> Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- ── OBREIROS ── -->
             <div class="view" id="view-obreiros">
                 <div class="topbar">
@@ -821,90 +843,6 @@
                     <div id="obTable"></div>
                 </div>
             </div>
-
-            <!-- MODAL EDITAR OBREIRO -->
-            <div class="modal-ov2" id="obModal" onclick="if(event.target===this)closeObModal()">
-                <div class="modal-box2">
-                    <div class="modal-head">
-                        <span id="obModalTitle" style="font-weight:600;color:#fff">Editar Obreiro</span>
-                        <button onclick="closeObModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem"><i class="fas fa-xmark"></i></button>
-                    </div>
-                    <div class="modal-body" style="padding:1.2rem 1.4rem;display:flex;flex-direction:column;gap:1rem">
-                        <input type="hidden" id="obEditId">
-                        <div class="fg2">
-                            <label class="flbl2">Nome completo</label>
-                            <input type="text" id="obEditNome" class="fi2">
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
-                            <div class="fg2">
-                                <label class="flbl2">Idade</label>
-                                <input type="number" id="obEditIdade" class="fi2">
-                            </div>
-                            <div class="fg2">
-                                <label class="flbl2">Telefone</label>
-                                <input type="text" id="obEditTel" class="fi2">
-                            </div>
-                        </div>
-                        <div class="fg2">
-                            <label class="flbl2">Endereço</label>
-                            <input type="text" id="obEditEnd" class="fi2">
-                        </div>
-                        <div class="fg2">
-                            <label class="flbl2">Equipe</label>
-                            <input type="text" id="obEditEq" class="fi2">
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
-                            <div class="fg2">
-                                <label class="flbl2">Vai levar filho?</label>
-                                <select id="obEditFilho" class="fi2" style="cursor:pointer">
-                                    <option value="Não">Não</option>
-                                    <option value="Sim">Sim</option>
-                                </select>
-                            </div>
-                            <div class="fg2">
-                                <label class="flbl2">Quantos filhos</label>
-                                <input type="number" id="obEditQtFilhos" class="fi2" min="0">
-                            </div>
-                        </div>
-                        <div class="fg2">
-                            <label class="flbl2">Status (Apto)</label>
-                            <select id="obEditApto" class="fi2" style="cursor:pointer">
-                                <option value="pendente">Pendente — aguardando avaliação</option>
-                                <option value="apto">Apto — confirmado</option>
-                                <option value="inapto">Inapto — não confirmado</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div style="padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:.7rem;justify-content:flex-end">
-                        <button onclick="closeObModal()" class="btn-d" style="background:transparent;border:1px solid var(--border)">Cancelar</button>
-                        <button onclick="saveObreiro()" class="btn-p"><i class="fas fa-save"></i> Salvar</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="view" id="view-usuarios">
-                <div class="topbar">
-                    <div>
-                        <div class="pg-title"><i class="fas fa-user-gear"></i> Usuários</div>
-                        <div class="pg-sub">Gerenciar acessos ao painel</div>
-                    </div>
-                    <button class="btn-p" onclick="openModal('userModal')"><i class="fas fa-plus"></i> Novo Usuário</button>
-                </div>
-                <div class="tbl-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th><i class="fas fa-at"></i> Usuário</th>
-                                <th><i class="fas fa-id-badge"></i> Nome</th>
-                                <th><i class="fas fa-shield"></i> Perfil</th>
-                                <th><i class="fas fa-sliders"></i> Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
 
             <!-- ── SITE ── -->
             <div class="view" id="view-site">
@@ -990,12 +928,10 @@
 
                 <!-- Rankings lado a lado -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
-                    <!-- Ranking Equipes -->
                     <div class="view-sec">
                         <div class="view-sec-head"><span><i class="fas fa-trophy"></i> Ranking de Equipes</span></div>
                         <div id="relRankEquipes" style="padding:.5rem 1rem 1rem"></div>
                     </div>
-                    <!-- Ranking Células -->
                     <div class="view-sec">
                         <div class="view-sec-head"><span><i class="fas fa-medal"></i> Ranking de Células</span></div>
                         <div id="relRankCelulas" style="padding:.5rem 1rem 1rem"></div>
@@ -1044,6 +980,65 @@
     </div>
 </div>
 
+<!-- ── MODAL: EDITAR OBREIRO ── -->
+<div class="modal-ov2" id="obModal" onclick="if(event.target===this)closeObModal()">
+    <div class="modal-box2">
+        <div class="modal-head">
+            <span id="obModalTitle" style="font-weight:600;color:#fff">Editar Obreiro</span>
+            <button onclick="closeObModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" style="padding:1.2rem 1.4rem;display:flex;flex-direction:column;gap:1rem">
+            <input type="hidden" id="obEditId">
+            <div class="fg2">
+                <label class="flbl2">Nome completo</label>
+                <input type="text" id="obEditNome" class="fi2">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                <div class="fg2">
+                    <label class="flbl2">Idade</label>
+                    <input type="number" id="obEditIdade" class="fi2">
+                </div>
+                <div class="fg2">
+                    <label class="flbl2">Telefone</label>
+                    <input type="text" id="obEditTel" class="fi2">
+                </div>
+            </div>
+            <div class="fg2">
+                <label class="flbl2">Endereço</label>
+                <input type="text" id="obEditEnd" class="fi2">
+            </div>
+            <div class="fg2">
+                <label class="flbl2">Equipe</label>
+                <input type="text" id="obEditEq" class="fi2">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                <div class="fg2">
+                    <label class="flbl2">Vai levar filho?</label>
+                    <select id="obEditFilho" class="fi2" style="cursor:pointer">
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                    </select>
+                </div>
+                <div class="fg2">
+                    <label class="flbl2">Quantos filhos</label>
+                    <input type="number" id="obEditQtFilhos" class="fi2" min="0">
+                </div>
+            </div>
+            <div class="fg2">
+                <label class="flbl2">Status (Apto)</label>
+                <select id="obEditApto" class="fi2" style="cursor:pointer">
+                    <option value="pendente">Pendente — aguardando avaliação</option>
+                    <option value="apto">Apto — confirmado</option>
+                    <option value="inapto">Inapto — não confirmado</option>
+                </select>
+            </div>
+        </div>
+        <div style="padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:.7rem;justify-content:flex-end">
+            <button onclick="closeObModal()" class="btn-d" style="background:transparent;border:1px solid var(--border)">Cancelar</button>
+            <button onclick="saveObreiro()" class="btn-p"><i class="fas fa-save"></i> Salvar</button>
+        </div>
+    </div>
+</div>
 
 <!-- ── MODAL: FINALIZAR ANO ── -->
 <div class="mbg" id="finalizarAnoModal">
@@ -1224,10 +1219,16 @@
         </div>
         <div class="mfg">
             <label><i class="fas fa-shield"></i> Perfil</label>
-            <select class="mfsel" id="umRole">
+            <select class="mfsel" id="umRole" onchange="toggleEquipeField()">
                 <option value="admin">Administrador</option>
                 <option value="lider">Líder</option>
                 <option value="viewer">Visualizador</option>
+            </select>
+        </div>
+        <div class="mfg" id="equipe-field" style="display:none">
+            <label><i class="fas fa-users"></i> Equipe do Líder *</label>
+            <select class="mfsel" id="umEquipe">
+                <option value="">Carregando equipes...</option>
             </select>
         </div>
         <div class="mfoot">
@@ -1257,10 +1258,8 @@
 // ═══════════════════════════════════════════════════════════
 //  API CLIENT
 // ═══════════════════════════════════════════════════════════
-// Vercel: mesmo domínio. Local: porta 3000
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? `${window.location.protocol}//${window.location.hostname}:3000`
-    : `${window.location.protocol}//${window.location.host}`;
+const API_PORT = 3000;
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
 
 const API = (() => {
     const h = { 'Content-Type': 'application/json' };
@@ -1358,7 +1357,6 @@ document.addEventListener('click', e => {
 // ═══════════════════════════════
 //  INIT
 // ═══════════════════════════════
-// Globals carregados do banco ao login
 let _rvAtiva  = 'RV1';
 let _anoAtivo = 2026;
 
@@ -1369,7 +1367,6 @@ async function initApp() {
         _anoAtivo = parseInt(cfg.ano_ativo || 2026);
     } catch(e) { _rvAtiva = 'RV1'; _anoAtivo = 2026; }
 
-    // Seta selects de filtro para a RV ativa
     ['dashRV','fRV','rankRV'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = _rvAtiva;
@@ -1406,19 +1403,17 @@ async function renderDashboard() {
             getEquipes()
         ]);
 
-        // ── calcular métricas extras ──────────────────────────
-        const total   = revs.length;
-        const homens  = revs.filter(r => r.sexo === 'Masculino');
-        const mulheres= revs.filter(r => r.sexo === 'Feminino');
-        const comFilho= revs.filter(r => r.informacao_filho && r.informacao_filho.trim() !== '' && r.informacao_filho.toLowerCase() !== 'não');
-        const comSaude= revs.filter(r =>
+        const total    = revs.length;
+        const homens   = revs.filter(r => r.sexo === 'Masculino');
+        const mulheres = revs.filter(r => r.sexo === 'Feminino');
+        const comFilho = revs.filter(r => r.informacao_filho && r.informacao_filho.trim() !== '' && r.informacao_filho.toLowerCase() !== 'não');
+        const comSaude = revs.filter(r =>
             (r.condicao_saude   && r.condicao_saude.trim()   !== '' && r.condicao_saude.toLowerCase()   !== 'nenhuma' && r.condicao_saude.toLowerCase() !== 'nada' && r.condicao_saude.toLowerCase() !== 'não') ||
             (r.restricao_alimentar && r.restricao_alimentar.trim() !== '' && r.restricao_alimentar.toLowerCase() !== 'nenhuma' && r.restricao_alimentar.toLowerCase() !== 'nada' && r.restricao_alimentar.toLowerCase() !== 'não')
         );
 
         const pctPago = total > 0 ? Math.round((stats.pagos||0)/total*100) : 0;
 
-        // ── statsGrid: 4 cards principais ─────────────────────
         document.getElementById('statsGrid').innerHTML = `
             <div class="scard">
                 <div class="scard-top"><div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8"><i class="fas fa-users"></i></div></div>
@@ -1443,10 +1438,8 @@ async function renderDashboard() {
             </div>
         `;
 
-        // ── calcular faixa etária ─────────────────────────────
         function calcIdade(dataNasc) {
             if (!dataNasc) return null;
-            // aceita YYYY-MM-DD ou DD/MM/YYYY
             let d;
             if (dataNasc.includes('/')) {
                 const [dd,mm,yyyy] = dataNasc.split('/');
@@ -1470,7 +1463,6 @@ async function renderDashboard() {
         const pctAdulto = total > 0 ? Math.round(adultos.length/total*100) : 0;
         const pctAdolesc = total > 0 ? Math.round(adolescentes.length/total*100) : 0;
 
-        // ── dashRow2: gráfico gênero + cards clicáveis ────────
         const pctH = total > 0 ? Math.round(homens.length/total*100) : 0;
         const pctM = total > 0 ? Math.round(mulheres.length/total*100) : 0;
 
@@ -1478,8 +1470,6 @@ async function renderDashboard() {
             <div class="chart-card">
                 <div class="chart-title"><i class="fas fa-chart-bar"></i> Perfil dos Inscritos</div>
                 <div class="gender-bars">
-
-                    <!-- GÊNERO -->
                     <div style="font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.3rem">Gênero</div>
                     <div class="gbar-row">
                         <div class="gbar-lbl"><i class="fas fa-mars" style="color:#60a5fa;margin-right:5px"></i>Homens</div>
@@ -1495,8 +1485,6 @@ async function renderDashboard() {
                         <div style="width:${pctH}%;background:linear-gradient(90deg,#1a8fc4,#60a5fa);transition:width .7s"></div>
                         <div style="flex:1;background:linear-gradient(90deg,#be185d,#f472b6);transition:width .7s"></div>
                     </div>
-
-                    <!-- FAIXA ETÁRIA -->
                     <div style="font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:.6rem 0 .3rem;padding-top:.7rem;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center">
                         <span>Faixa Etária</span>
                         <span style="font-size:.72rem;color:#a78bfa;font-weight:600;letter-spacing:0">Idade média: <strong style="color:#c4b5fd">${idadeMedia} anos</strong></span>
@@ -1517,8 +1505,6 @@ async function renderDashboard() {
                         ${semIdade.length>0?`<div style="flex:1;background:rgba(255,255,255,.06)"></div>`:''}
                     </div>
                     ${semIdade.length>0?`<div style="font-size:.67rem;color:var(--muted);margin-top:.35rem"><i class="fas fa-circle-info" style="margin-right:3px"></i>${semIdade.length} sem data de nascimento</div>`:''}
-
-                    <!-- TOTAIS -->
                     <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:.6rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.06)">
                         <span>Total: <strong style="color:#fff">${total}</strong></span>
                         <span style="color:#60a5fa">${pctH}% masc · <span style="color:#f472b6">${pctM}% fem</span></span>
@@ -1548,7 +1534,6 @@ async function renderDashboard() {
             </div>
         `;
 
-        // ── listas recentes e top equipes ─────────────────────
         const recent = [...revs].sort((a,b)=>new Date(b.data_inscricao)-new Date(a.data_inscricao)).slice(0,6);
         document.getElementById('recentList').innerHTML = recent.length
             ? recent.map(r => `
@@ -1619,24 +1604,23 @@ function closeDetailModal() {
 //  OBREIROS
 // ═══════════════════════════════
 async function renderObreiros() {
-    const rv    = document.getElementById('obFiltroRV').value;
-    const apto  = document.getElementById('obFiltroApto').value;
-    const srch  = (document.getElementById('obSrch')?.value || '').toLowerCase();
+    const rv   = document.getElementById('obFiltroRV').value;
+    const apto = document.getElementById('obFiltroApto').value;
+    const srch = (document.getElementById('obSrch')?.value || '').toLowerCase();
 
     try {
         let url = `/api/obreiros?ativo=true`;
-        if (rv   !== 'all') url += `&revisao=${rv}`;
+        if (rv !== 'all') url += `&revisao=${rv}`;
         const r = await API.get(url);
         let lista = r;
         if (apto !== 'all') lista = lista.filter(o => o.apto === apto);
         if (srch) lista = lista.filter(o => (o.nome_completo||'').toLowerCase().includes(srch));
 
-        // stats
-        const total    = lista.length;
-        const aptos    = lista.filter(o => o.apto === 'apto').length;
-        const inaptos  = lista.filter(o => o.apto === 'inapto').length;
-        const pendentes= lista.filter(o => o.apto === 'pendente').length;
-        const comFilho = lista.filter(o => o.vai_levar_filho === 'Sim').length;
+        const total     = lista.length;
+        const aptos     = lista.filter(o => o.apto === 'apto').length;
+        const inaptos   = lista.filter(o => o.apto === 'inapto').length;
+        const pendentes = lista.filter(o => o.apto === 'pendente').length;
+        const comFilho  = lista.filter(o => o.vai_levar_filho === 'Sim').length;
 
         document.getElementById('obStats').innerHTML = `
             <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8"><i class="fas fa-hammer"></i></div></div><div class="scard-val">${total}</div><div class="scard-lbl">Total Inscritos</div></div>
@@ -1653,7 +1637,7 @@ async function renderObreiros() {
         }
 
         document.getElementById('obTable').innerHTML = `
-            <table class="rev-table" style="width:100%;border-collapse:collapse">
+            <table style="width:100%;border-collapse:collapse">
                 <thead>
                     <tr style="border-bottom:1px solid var(--border)">
                         <th style="padding:9px 14px;text-align:left;font-size:.72rem;color:var(--muted);font-weight:500">Nome</th>
@@ -1708,15 +1692,15 @@ async function toggleAptoObreiro(id, atual) {
 }
 
 function openObModal(ob) {
-    document.getElementById('obEditId').value    = ob.id;
-    document.getElementById('obEditNome').value  = ob.nome_completo || '';
-    document.getElementById('obEditIdade').value = ob.idade || '';
-    document.getElementById('obEditTel').value   = ob.telefone || '';
-    document.getElementById('obEditEnd').value   = ob.endereco || '';
-    document.getElementById('obEditEq').value    = ob.equipe_texto || ob.equipe_nome || '';
-    document.getElementById('obEditFilho').value = ob.vai_levar_filho || 'Não';
+    document.getElementById('obEditId').value       = ob.id;
+    document.getElementById('obEditNome').value     = ob.nome_completo || '';
+    document.getElementById('obEditIdade').value    = ob.idade || '';
+    document.getElementById('obEditTel').value      = ob.telefone || '';
+    document.getElementById('obEditEnd').value      = ob.endereco || '';
+    document.getElementById('obEditEq').value       = ob.equipe_texto || ob.equipe_nome || '';
+    document.getElementById('obEditFilho').value    = ob.vai_levar_filho || 'Não';
     document.getElementById('obEditQtFilhos').value = ob.quantos_filhos || 0;
-    document.getElementById('obEditApto').value  = ob.apto || 'pendente';
+    document.getElementById('obEditApto').value     = ob.apto || 'pendente';
     document.getElementById('obModal').classList.add('open');
 }
 
@@ -1908,7 +1892,6 @@ async function finalizeRV() {
         const r = await API.post('/api/revisionistas/finalizar', { revisao: rv });
         closeModal('finalizeModal');
 
-        // Atualiza RV ativa global e todos os filtros
         _rvAtiva = r.nova_rv;
         ['dashRV','fRV','rankRV'].forEach(id => {
             const el = document.getElementById(id);
@@ -1917,7 +1900,6 @@ async function finalizeRV() {
 
         toast(`✅ ${rv} finalizada! Site avançou para ${r.nova_rv}.`, 'ok');
         renderRevs(); renderDashboard(); renderRanking();
-        // Atualiza aba Site se estiver aberta
         renderSite();
     } catch(e) {}
 }
@@ -1994,7 +1976,7 @@ function addCelFld(nome='', lider='', celId=null) {
     const id = ++celCnt;
     const d  = document.createElement('div');
     d.id = 'cf'+id;
-    d.dataset.celId = celId || '';   // preserva o ID da célula existente
+    d.dataset.celId = celId || '';
     d.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-bottom:7px;align-items:center';
     d.innerHTML = `
         <input class="mfi" placeholder="Nome da célula" value="${nome}" style="font-size:.82rem;padding:9px 11px">
@@ -2124,24 +2106,42 @@ async function renderUsers() {
 }
 
 async function saveUser() {
-    const u=document.getElementById('umUser').value.trim();
-    const n=document.getElementById('umName').value.trim();
-    const p=document.getElementById('umPass').value;
-    const r=document.getElementById('umRole').value;
-    if(!u||!n||!p){toast('Preencha todos os campos!','warn');return;}
+    const u  = document.getElementById('umUser').value.trim();
+    const n  = document.getElementById('umName').value.trim();
+    const p  = document.getElementById('umPass').value;
+    const r  = document.getElementById('umRole').value;
+    const eq = document.getElementById('umEquipe').value || null;
+    if (!u || !n || !p) { toast('Preencha todos os campos!', 'warn'); return; }
+    if (r === 'lider' && !eq) { toast('Selecione a equipe do líder!', 'warn'); return; }
     try {
-        await API.post('/api/usuarios',{username:u,name:n,password:p,role:r});
-        closeModal('userModal'); renderUsers(); toast('Usuário criado!','ok');
+        await API.post('/api/usuarios', { username: u, name: n, password: p, role: r, equipe_id: eq ? parseInt(eq) : null });
+        closeModal('userModal'); renderUsers(); toast('Usuário criado!', 'ok');
     } catch(e) {}
 }
 
+function toggleEquipeField() {
+    const r     = document.getElementById('umRole').value;
+    const field = document.getElementById('equipe-field');
+    field.style.display = r === 'lider' ? 'block' : 'none';
+    if (r === 'lider') {
+        populateEquipeSelect();
+    } else {
+        document.getElementById('umEquipe').value = '';
+    }
+}
+async function populateEquipeSelect() {
+    try {
+        const eqs = await API.get('/api/equipes');
+        const sel = document.getElementById('umEquipe');
+        sel.innerHTML = '<option value="">Selecione a equipe...</option>' +
+            eqs.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+    } catch(e) { console.error('Erro ao carregar equipes:', e); }
+}
 async function delUser(id) {
     if(!confirm('Excluir usuário?'))return;
     try { await API.delete(`/api/usuarios/${id}`); renderUsers(); toast('Excluído.','ok'); }
     catch(e){}
 }
-
-
 
 // ═══════════════════════════════
 //  RELATÓRIOS
@@ -2152,21 +2152,17 @@ let _relStats  = {};
 let _relRVFilter = 'all';
 
 async function renderRelatorios() {
-    // Descobre quais anos têm dados
     try {
         const cfg = await API.get('/api/config');
         _rvAtiva  = cfg.rv_ativa  || 'RV1';
         _anoAtivo = parseInt(cfg.ano_ativo || 2026);
     } catch(e) {}
 
-    // Gera lista de anos de 2026 até o ano ativo
     const anos = [];
     for (let a = 2026; a <= _anoAtivo; a++) anos.push(a);
 
-    // Seleciona o último ano por padrão (mais recente relevante = ano ativo - 1 se já finalizou, senão atual)
     if (!_relAnoSelecionado) _relAnoSelecionado = _anoAtivo;
 
-    // Render tabs de anos
     const tabs = document.getElementById('anoTabs');
     tabs.innerHTML = anos.map(a => `
         <button class="ano-tab ${a === _relAnoSelecionado ? 'active' : ''}" onclick="selectRelAno(${a})">${a}</button>
@@ -2203,15 +2199,12 @@ function renderRelSummary() {
     const rvs   = ['RV1','RV2','RV3','RV4'];
     const stats = _relStats?.por_revisao || [];
 
-    // Totais gerais
     const total = dados.length;
     const masc  = dados.filter(r => r.sexo==='Masculino').length;
     const fem   = dados.filter(r => r.sexo==='Feminino').length;
 
-    // Card geral + cards por RV
     let html = `
         <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:.75rem;align-items:stretch">
-            <!-- Card total -->
             <div class="scard" style="border:1px solid rgba(26,143,196,.25)">
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:.8rem">
                     <div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem"><i class="fas fa-users"></i></div>
@@ -2254,7 +2247,6 @@ function renderRelEquipes() {
     const celulas = _relStats?.celulas  || [];
     const el      = document.getElementById('relEquipes');
 
-    // ── Ranking equipes ──────────────────────────────────────
     const maxEq = Math.max(1, ...equipes.map(e => parseInt(e.total)||0));
     document.getElementById('relRankEquipes').innerHTML = equipes.length
         ? equipes.map((eq, i) => `
@@ -2268,7 +2260,6 @@ function renderRelEquipes() {
             </div>`).join('')
         : '<div class="empty" style="padding:1.5rem"><i class="fas fa-trophy"></i><p>Sem dados</p></div>';
 
-    // ── Ranking células (todas, flat, ordenadas por total) ───
     const allCels = [...celulas].sort((a,b) => parseInt(b.total)-parseInt(a.total));
     const maxCel  = Math.max(1, ...allCels.map(c => parseInt(c.total)||0));
     document.getElementById('relRankCelulas').innerHTML = allCels.length
@@ -2296,7 +2287,6 @@ function renderRelEquipes() {
         const uid  = `eq-drop-${idx}`;
         return `
         <div style="margin-bottom:.6rem;border:1px solid rgba(26,143,196,.1);border-radius:10px;overflow:hidden">
-            <!-- Cabeçalho clicável -->
             <div onclick="toggleEqDrop('${uid}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;background:rgba(26,143,196,.04);transition:background .2s"
                  onmouseover="this.style.background='rgba(26,143,196,.08)'" onmouseout="this.style.background='rgba(26,143,196,.04)'">
                 <div style="width:34px;height:34px;border-radius:8px;background:${eq.color};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:rgba(0,0,0,.75);flex-shrink:0">${eq.name.substring(0,1)}</div>
@@ -2304,7 +2294,6 @@ function renderRelEquipes() {
                     <div style="font-weight:600;color:#fff;font-size:.88rem">${eq.name}</div>
                     <div style="font-size:.7rem;color:var(--muted2);margin-top:1px">${cels.length} célula${cels.length!==1?'s':''}</div>
                 </div>
-                <!-- Barra de progresso inline -->
                 <div style="flex:1;max-width:140px">
                     <div style="height:4px;border-radius:2px;background:rgba(255,255,255,.06)">
                         <div style="height:100%;border-radius:2px;background:${eq.color};width:${Math.round(parseInt(eq.total)/maxTotal*100)}%;opacity:.8"></div>
@@ -2313,7 +2302,6 @@ function renderRelEquipes() {
                 <div style="font-size:1.25rem;font-weight:800;color:${eq.color};min-width:36px;text-align:right">${eq.total}</div>
                 <i class="fas fa-chevron-down" id="${uid}-icon" style="color:var(--muted);font-size:.72rem;transition:transform .25s;margin-left:4px"></i>
             </div>
-            <!-- Células dropdown -->
             <div id="${uid}" style="display:none;border-top:1px solid rgba(26,143,196,.08)">
                 ${cels.length ? cels.map(c => `
                     <div style="display:flex;align-items:center;gap:10px;padding:9px 14px 9px 62px;border-bottom:1px solid rgba(26,143,196,.05);font-size:.82rem">
@@ -2392,7 +2380,6 @@ function exportCSV() {
     toast('CSV exportado!', 'ok');
 }
 
-
 function abrirModalFinalizarAno() {
     document.getElementById('anoAtualModal').textContent  = _anoAtivo;
     document.getElementById('anoAtualModal2').textContent = _anoAtivo;
@@ -2405,7 +2392,6 @@ async function executarFinalizarAno() {
         const r = await API.post('/api/ano/finalizar', {});
         closeModal('finalizarAnoModal');
 
-        // Atualiza globals
         _anoAtivo = r.novo_ano;
         _rvAtiva  = 'RV1';
         ['dashRV','fRV','rankRV'].forEach(id => {
@@ -2418,7 +2404,6 @@ async function executarFinalizarAno() {
         renderRanking();
         renderRevs();
         renderSite();
-        // Vai para relatórios para ver o ano finalizado
         _relAnoSelecionado = r.ano_finalizado;
         showView('relatorios');
     } catch(e) {}
@@ -2434,7 +2419,6 @@ async function renderSite() {
         _anoAtivo = parseInt(cfg.ano_ativo || 2026);
     } catch(e) {}
 
-    // Atualiza badge principal
     const rvLabels = {
         'RV1': { label:'Revisão 1', periodo:'Janeiro — Março' },
         'RV2': { label:'Revisão 2', periodo:'Abril — Junho' },
@@ -2456,12 +2440,10 @@ async function renderSite() {
         <span style="color:var(--muted2)">${info.periodo}</span>
     `;
 
-    // Botões de seleção
     document.querySelectorAll('.rv-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.rv === _rvAtiva);
     });
 
-    // Histórico por RV
     try {
         const { rows: stats } = await Promise.resolve(
             (async () => {
@@ -2505,7 +2487,6 @@ async function setRVAtiva(rv) {
         await API.put('/api/config', { rv_ativa: rv });
         _rvAtiva  = rv;
 
-        // Atualiza todos os selects do painel para a nova RV
         ['dashRV','fRV','rankRV'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = rv;
