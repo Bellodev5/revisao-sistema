@@ -1,5 +1,13 @@
 // ============================================================
 //  REVISÃO DE VIDAS — API Backend
+//  Node.js + Express + PostgreSQL
+//
+//  Instalar dependências:
+//    npm install express cors pg dotenv
+//
+//  Rodar:
+//    node server.js
+//    (ou: npx nodemon server.js para desenvolvimento)
 // ============================================================
 
 require('dotenv').config();
@@ -552,19 +560,20 @@ app.patch('/api/lideres/inscritos/:id/pagamento', async (req, res) => {
 // PUT /api/lideres/inscritos/:id
 app.put('/api/lideres/inscritos/:id', async (req, res) => {
     try {
-        const { nome_completo, telefone, condicao_saude, restricao_alimentar, informacao_filho, celula_id, celula_nome_snap, celula_lider_snap } = req.body;
+        const { nome_completo, telefone, data_nascimento, condicao_saude, restricao_alimentar, informacao_filho, celula_id, celula_nome_snap, celula_lider_snap } = req.body;
         const { rows } = await q(
             `UPDATE revisionistas SET
                 nome_completo=COALESCE($1,nome_completo),
                 telefone=COALESCE($2,telefone),
-                condicao_saude=$3,
-                restricao_alimentar=$4,
-                informacao_filho=$5,
-                celula_id=COALESCE($6,celula_id),
-                celula_nome_snap=COALESCE($7,celula_nome_snap),
-                celula_lider_snap=COALESCE($8,celula_lider_snap)
-             WHERE id=$9 RETURNING id, nome_completo, pagamento, celula_id, celula_nome_snap`,
-            [nome_completo, telefone, condicao_saude||null, restricao_alimentar||null, informacao_filho||null,
+                data_nascimento=COALESCE($3,data_nascimento),
+                condicao_saude=$4,
+                restricao_alimentar=$5,
+                informacao_filho=$6,
+                celula_id=COALESCE($7,celula_id),
+                celula_nome_snap=COALESCE($8,celula_nome_snap),
+                celula_lider_snap=COALESCE($9,celula_lider_snap)
+             WHERE id=$10 RETURNING id, nome_completo, sexo, data_nascimento, telefone, pagamento, celula_id, celula_nome_snap, celula_lider_snap, condicao_saude, restricao_alimentar, informacao_filho`,
+            [nome_completo, telefone, data_nascimento||null, condicao_saude||null, restricao_alimentar||null, informacao_filho||null,
              celula_id||null, celula_nome_snap||null, celula_lider_snap||null, req.params.id]
         );
         if (!rows.length) return err(res, 'Não encontrado', 404);
@@ -774,24 +783,24 @@ app.get('/api/obreiros', async (req, res) => {
         ok(res, rows);
     } catch(e) { err(res, e.message, 500); }
 });
-
+ 
 // POST /api/obreiros  (inscrição pública)
 app.post('/api/obreiros', async (req, res) => {
     try {
         const { nome_completo, idade, endereco, telefone, vai_levar_filho, quantos_filhos, equipe } = req.body;
         if (!nome_completo || !idade || !endereco || !equipe)
             return err(res, 'Campos obrigatorios faltando');
-
+ 
         // busca RV ativa e ano ativo
         const { rows: cfg } = await q("SELECT chave, valor FROM config WHERE chave IN ('rv_ativa','ano_ativo')");
         const cfgMap = Object.fromEntries(cfg.map(r => [r.chave, r.valor]));
         const revisao = cfgMap.rv_ativa || 'RV1';
         const ano = parseInt(cfgMap.ano_ativo || new Date().getFullYear());
-
+ 
         // tenta achar equipe_id pelo nome
         const { rows: eqs } = await q("SELECT id FROM equipes WHERE name ILIKE $1", [equipe.split('-')[0].trim()]);
         const equipe_id = eqs[0]?.id || null;
-
+ 
         const { rows: [ob] } = await q(`INSERT INTO obreiros
             (nome_completo, idade, endereco, telefone, vai_levar_filho, quantos_filhos, equipe_texto, equipe_id, revisao, ano_referencia)
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
@@ -801,7 +810,7 @@ app.post('/api/obreiros', async (req, res) => {
         ok(res, { id: ob.id, revisao, ano });
     } catch(e) { err(res, e.message, 500); }
 });
-
+ 
 // GET /api/obreiros/:id
 app.get('/api/obreiros/:id', async (req, res) => {
     try {
@@ -810,11 +819,11 @@ app.get('/api/obreiros/:id', async (req, res) => {
         ok(res, o);
     } catch(e) { err(res, e.message, 500); }
 });
-
+ 
 // PUT /api/obreiros/:id
 app.put('/api/obreiros/:id', async (req, res) => {
     try {
-        const { nome_completo, idade, endereco, telefone, vai_levar_filho, quantos_filhos, equipe_texto, equipe_id, apto } = req.body;
+        const { nome_completo, idade, endereco, telefone, vai_levar_filho, quantos_filhos, equipe_texto, equipe_id, apto, pagamento } = req.body;
         const { rows: [o] } = await q(`UPDATE obreiros SET
             nome_completo=COALESCE($1,nome_completo),
             idade=COALESCE($2,idade),
@@ -825,16 +834,17 @@ app.put('/api/obreiros/:id', async (req, res) => {
             equipe_texto=COALESCE($7,equipe_texto),
             equipe_id=COALESCE($8,equipe_id),
             apto=COALESCE($9,apto),
+            pagamento=COALESCE($10,pagamento),
             updated_at=NOW()
-            WHERE id=$10 RETURNING *`,
+            WHERE id=$11 RETURNING *`,
             [nome_completo, idade ? parseInt(idade) : null, endereco, telefone,
              vai_levar_filho, quantos_filhos !== undefined ? parseInt(quantos_filhos) : null,
-             equipe_texto, equipe_id||null, apto, req.params.id]);
+             equipe_texto, equipe_id||null, apto, pagamento||null, req.params.id]);
         if (!o) return err(res, 'Não encontrado', 404);
         ok(res, o);
     } catch(e) { err(res, e.message, 500); }
 });
-
+ 
 // PATCH /api/obreiros/:id/apto
 app.patch('/api/obreiros/:id/apto', async (req, res) => {
     try {
@@ -843,7 +853,17 @@ app.patch('/api/obreiros/:id/apto', async (req, res) => {
         ok(res, { apto });
     } catch(e) { err(res, e.message, 500); }
 });
-
+ 
+// PATCH /api/obreiros/:id/pagamento
+app.patch('/api/obreiros/:id/pagamento', async (req, res) => {
+    try {
+        const { pagamento } = req.body;
+        if (!['confirmado','pendente'].includes(pagamento)) return err(res, 'Valor inválido');
+        await q('UPDATE obreiros SET pagamento=$1, updated_at=NOW() WHERE id=$2', [pagamento, req.params.id]);
+        ok(res, { pagamento });
+    } catch(e) { err(res, e.message, 500); }
+});
+ 
 // DELETE /api/obreiros/:id
 app.delete('/api/obreiros/:id', async (req, res) => {
     try {
@@ -851,7 +871,7 @@ app.delete('/api/obreiros/:id', async (req, res) => {
         ok(res, { deleted: true });
     } catch(e) { err(res, e.message, 500); }
 });
-
+ 
 // POST /api/obreiros/finalizar  (arquiva ativos da RV informada)
 app.post('/api/obreiros/finalizar', async (req, res) => {
     try {
@@ -866,6 +886,7 @@ app.post('/api/obreiros/finalizar', async (req, res) => {
 // ─── START ────────────────────────────────────────────────────
 app.listen(PORT, () => {
     console.log(`\n🚀 Servidor rodando em http://localhost:${PORT}`);
-    
+    console.log(`   Site inscrição: http://localhost:${PORT}/inscricao.html`);
+    console.log(`   Painel admin:   http://localhost:${PORT}/painel-admin.html`);
     console.log(`   API:            http://localhost:${PORT}/api/\n`);
 });
