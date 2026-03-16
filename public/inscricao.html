@@ -681,7 +681,7 @@ document.getElementById('regForm').addEventListener('submit', async e => {
     try {
         const cfgResp = await fetch(`${API_BASE}/api/config`);
         const cfgJson = await cfgResp.json();
-        data.revisao  = (cfgJson.success && cfgJson.data?.valor) ? cfgJson.data.valor : null;
+        data.revisao = (cfgJson.success && cfgJson.data?.rv_ativa) ? cfgJson.data.rv_ativa : null;
     } catch(e) { data.revisao = null; }
     if (!data.revisao) {
         const m = new Date().getMonth() + 1;
