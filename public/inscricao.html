@@ -488,18 +488,43 @@
                 <input type="text" id="inpLider" name="lider_ou_convite" class="fi" readonly
                        placeholder="Preenchido automaticamente" style="background:rgba(26,143,196,.04);color:var(--muted2)">
             </div>
+
+            <!-- CONDIÇÃO DE SAÚDE -->
             <div class="fg">
-                <label class="flbl"><i class="fas fa-heart-pulse"></i> Condição de saúde <span style="color:var(--muted);font-weight:300;font-size:.68rem">(se houver)</span></label>
-                <textarea name="condicao_saude" class="fta" placeholder="Descreva qualquer condição relevante..."></textarea>
+                <label class="flbl"><i class="fas fa-heart-pulse"></i> Possui alguma condição de saúde?</label>
+                <div class="rgroup">
+                    <label class="rl"><input type="radio" name="condicao_saude_yn" value="Não" checked onchange="toggleSaude(this)"><i class="fas fa-xmark" style="color:#f87171"></i> Não</label>
+                    <label class="rl"><input type="radio" name="condicao_saude_yn" value="Sim" onchange="toggleSaude(this)"><i class="fas fa-check" style="color:#4ade80"></i> Sim</label>
+                </div>
+                <div id="fgSaudeDesc" style="display:none;margin-top:.75rem">
+                    <textarea name="condicao_saude" class="fta" placeholder="Descreva qualquer condição relevante..."></textarea>
+                </div>
             </div>
+
+            <!-- RESTRIÇÃO ALIMENTAR -->
             <div class="fg">
-                <label class="flbl"><i class="fas fa-utensils"></i> Restrição alimentar <span style="color:var(--muted);font-weight:300;font-size:.68rem">(se houver)</span></label>
-                <textarea name="restricao_alimentar" class="fta" placeholder="Alergias ou restrições alimentares..."></textarea>
+                <label class="flbl"><i class="fas fa-utensils"></i> Possui alguma restrição alimentar?</label>
+                <div class="rgroup">
+                    <label class="rl"><input type="radio" name="restricao_alimentar_yn" value="Não" checked onchange="toggleRestr(this)"><i class="fas fa-xmark" style="color:#f87171"></i> Não</label>
+                    <label class="rl"><input type="radio" name="restricao_alimentar_yn" value="Sim" onchange="toggleRestr(this)"><i class="fas fa-check" style="color:#4ade80"></i> Sim</label>
+                </div>
+                <div id="fgRestrDesc" style="display:none;margin-top:.75rem">
+                    <textarea name="restricao_alimentar" class="fta" placeholder="Alergias ou restrições alimentares..."></textarea>
+                </div>
             </div>
+
+            <!-- FILHOS -->
             <div class="fg">
-                <label class="flbl"><i class="fas fa-child"></i> Filhos <span style="color:var(--muted);font-weight:300;font-size:.68rem">(Nome e Idade)</span></label>
-                <textarea name="informacao_filho" class="fta" placeholder="Nome e idade de cada filho..."></textarea>
+                <label class="flbl"><i class="fas fa-child"></i> Vai levar filhos?</label>
+                <div class="rgroup">
+                    <label class="rl"><input type="radio" name="informacao_filho_yn" value="Não" checked onchange="toggleFilho(this)"><i class="fas fa-xmark" style="color:#f87171"></i> Não</label>
+                    <label class="rl"><input type="radio" name="informacao_filho_yn" value="Sim" onchange="toggleFilho(this)"><i class="fas fa-check" style="color:#4ade80"></i> Sim</label>
+                </div>
+                <div id="fgFilhoDesc" style="display:none;margin-top:.75rem">
+                    <textarea name="informacao_filho" class="fta" placeholder="Nome e idade de cada filho..."></textarea>
+                </div>
             </div>
+
             <div class="fg">
                 <label class="flbl"><i class="fas fa-phone-volume"></i> 3 Contatos de emergência <span style="color:#f87171;margin-left:2px">*</span></label>
                 <textarea name="contatos_emergencia" required class="fta" placeholder="Nome + Telefone de 3 contatos de emergência..."></textarea>
@@ -520,7 +545,7 @@
                     <i class="fas fa-paper-plane" id="subIcon"></i>
                     <span id="subTxt">CONFIRMAR PRESENÇA</span>
                 </button>
-                <button type="reset" class="btn-rst">
+                <button type="reset" class="btn-rst" onclick="resetCondicional()">
                     <i class="fas fa-rotate-left"></i> Limpar
                 </button>
             </div>
@@ -588,6 +613,27 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
     ? `${window.location.protocol}//${window.location.hostname}:3000`
     : `${window.location.protocol}//${window.location.host}`;
 const WEBHOOK_BKP = 'https://webhookb2cms.vaidavenda.com.br/webhook/d80428dd-d02b-45d0-a6d5-dd45fdbfc1e0';
+
+// ── TOGGLE SAÚDE / RESTRIÇÃO / FILHOS ────────────────────────
+function toggleSaude(el) {
+    document.getElementById('fgSaudeDesc').style.display = el.value === 'Sim' ? 'block' : 'none';
+    if (el.value === 'Não') { const t = document.querySelector('textarea[name="condicao_saude"]'); if(t) t.value = ''; }
+}
+function toggleRestr(el) {
+    document.getElementById('fgRestrDesc').style.display = el.value === 'Sim' ? 'block' : 'none';
+    if (el.value === 'Não') { const t = document.querySelector('textarea[name="restricao_alimentar"]'); if(t) t.value = ''; }
+}
+function toggleFilho(el) {
+    document.getElementById('fgFilhoDesc').style.display = el.value === 'Sim' ? 'block' : 'none';
+    if (el.value === 'Não') { const t = document.querySelector('textarea[name="informacao_filho"]'); if(t) t.value = ''; }
+}
+
+// Reseta campos condicionais ao clicar em Limpar
+function resetCondicional() {
+    document.getElementById('fgSaudeDesc').style.display = 'none';
+    document.getElementById('fgRestrDesc').style.display = 'none';
+    document.getElementById('fgFilhoDesc').style.display = 'none';
+}
 
 // ── CARREGAR EQUIPES DO BANCO ─────────────────────────────────
 let _equipes = [];
@@ -677,6 +723,14 @@ document.getElementById('regForm').addEventListener('submit', async e => {
     const fd = new FormData(e.target), data = {};
     fd.forEach((v, k) => data[k] = v || '');
 
+    // Saúde, restrição e filhos: se Não ou não marcado → null
+    if (data.condicao_saude_yn !== 'Sim')       data.condicao_saude        = null;
+    if (data.restricao_alimentar_yn !== 'Sim')  data.restricao_alimentar   = null;
+    if (data.informacao_filho_yn !== 'Sim')      data.informacao_filho      = null;
+    delete data.condicao_saude_yn;
+    delete data.restricao_alimentar_yn;
+    delete data.informacao_filho_yn;
+
     // Revisão: busca a ativa no banco, fallback por mês
     try {
         const cfgResp = await fetch(`${API_BASE}/api/config`);
@@ -728,6 +782,10 @@ document.getElementById('regForm').addEventListener('submit', async e => {
         document.getElementById('selCelula').innerHTML = '<option value="" disabled selected>Selecione a equipe primeiro</option>';
         document.getElementById('selCelula').disabled = true;
         document.getElementById('fgLider').style.display = 'none';
+        // Esconder campos condicionais
+        document.getElementById('fgSaudeDesc').style.display = 'none';
+        document.getElementById('fgRestrDesc').style.display = 'none';
+        document.getElementById('fgFilhoDesc').style.display = 'none';
         document.getElementById('modal').classList.add('open');
     }
 });
