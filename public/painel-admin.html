@@ -541,17 +541,18 @@
 
         /* ── DRAWER ── */
         .dbg{
-            position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;
-            opacity:0;pointer-events:none;transition:opacity .22s
-        }
-        .dbg.open{opacity:1;pointer-events:all}
-        .drawer{
-            position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;
-            background:var(--s1);border-left:1px solid var(--border);z-index:151;
-            transform:translateX(100%);transition:transform .28s ease;
-            overflow-y:auto;padding:1.75rem
-        }
-        .dbg.open .drawer{transform:translateX(0)}
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;
+    opacity:0;pointer-events:none;transition:opacity .22s
+}
+.dbg.open{opacity:1;pointer-events:all}
+.drawer{
+    position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;
+    background:var(--s1);border-left:1px solid var(--border);z-index:151;
+    transform:translateX(100%);transition:transform .28s ease;
+    overflow-y:auto;padding:1.75rem
+}
+.dbg.open .drawer{transform:translateX(0)}
+
         .dhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.75rem}
         .dname{font-size:1rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px}
         .dname i{color:var(--muted)}
@@ -1013,7 +1014,7 @@
                         <div class="pg-title"><i class="fas fa-user-gear"></i> Usuários</div>
                         <div class="pg-sub">Gerenciar acessos ao painel</div>
                     </div>
-                    <button class="btn-p" onclick="openModal('userModal')"><i class="fas fa-plus"></i> Novo Usuário</button>
+                    <button class="btn-p" onclick="openUserModal()"><i class="fas fa-plus"></i> Novo Usuário</button>
                 </div>
                 <div class="tbl-wrap">
                     <table>
@@ -1022,6 +1023,7 @@
                                 <th><i class="fas fa-at"></i> Usuário</th>
                                 <th><i class="fas fa-id-badge"></i> Nome</th>
                                 <th><i class="fas fa-shield"></i> Perfil</th>
+                                <th><i class="fas fa-people-group"></i> Equipe</th>
                                 <th><i class="fas fa-sliders"></i> Ações</th>
                             </tr>
                         </thead>
@@ -1246,6 +1248,7 @@
                 <label><i class="fas fa-cake-candles"></i> Data de Nascimento</label>
                 <input class="mfi" type="date" id="rmNasc" style="color-scheme:dark">
             </div>
+        </div>
         <div class="mfrow">
             <div class="mfg">
                 <label><i class="fas fa-venus-mars"></i> Sexo</label>
@@ -1286,6 +1289,38 @@
         <div class="mfg">
             <label><i class="fas fa-user-tie"></i> Líder / Quem convidou</label>
             <input class="mfi" id="rmLider" placeholder="Nome do líder">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-house"></i> Endereço</label>
+            <input class="mfi" id="rmEndereco" placeholder="Rua, número, bairro, cidade">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-heart-pulse"></i> Condição de saúde</label>
+            <input class="mfi" id="rmSaude" placeholder="Ex: diabetes, hipertensão... ou Nenhuma">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-utensils"></i> Restrição alimentar</label>
+            <input class="mfi" id="rmRestr" placeholder="Ex: vegetariano, alergia a glúten... ou Nenhuma">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-child-reaching"></i> Informação sobre filhos</label>
+            <input class="mfi" id="rmFilho" placeholder="Ex: Leva 1 filho de 5 anos... ou Não">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-phone-volume"></i> Contatos de emergência</label>
+            <input class="mfi" id="rmEmerg" placeholder="Nome e telefone do contato de emergência">
+        </div>
+        <div class="mfg">
+            <label><i class="fas fa-star"></i> Expectativa</label>
+            <input class="mfi" id="rmExp" placeholder="O que espera da revisão?">
+        </div>
+        <div class="mfg">
+            <label><i class="fab fa-whatsapp"></i> Entrou no grupo do WhatsApp?</label>
+            <select class="mfsel" id="rmWA">
+                <option value="">— Não informado —</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+            </select>
         </div>
         <div class="mfoot">
             <button class="btn-s" onclick="closeModal('revModal')"><i class="fas fa-xmark"></i> Cancelar</button>
@@ -1354,11 +1389,21 @@
         </div>
         <div class="mfg">
             <label><i class="fas fa-shield"></i> Perfil</label>
-            <select class="mfsel" id="umRole">
+            <select class="mfsel" id="umRole" onchange="toggleEquipeField()">
                 <option value="admin">Administrador</option>
                 <option value="lider">Líder</option>
                 <option value="viewer">Visualizador</option>
             </select>
+        </div>
+        <div class="mfg" id="umEquipeGrp" style="display:none">
+            <label><i class="fas fa-people-group"></i> Equipe do Líder *</label>
+            <select class="mfsel" id="umEquipe">
+                <option value="">— Selecione a equipe —</option>
+            </select>
+            <div style="font-size:.71rem;color:var(--muted);margin-top:.35rem;display:flex;align-items:center;gap:5px">
+                <i class="fas fa-circle-info" style="color:var(--accent2)"></i>
+                O líder verá apenas os dados desta equipe no portal
+            </div>
         </div>
         <div class="mfoot">
             <button class="btn-s" onclick="closeModal('userModal')"><i class="fas fa-xmark"></i> Cancelar</button>
@@ -1935,7 +1980,7 @@ async function renderRevs() {
                 <td><span class="badge b-blue"><i class="fas fa-tag"></i>${r.revisao||'—'}</span></td>
                 <td><span class="badge ${r.pagamento==='confirmado'?'b-green':'b-yellow'}"><i class="fas fa-${r.pagamento==='confirmado'?'check':'clock'}"></i>${r.pagamento==='confirmado'?'Confirmado':'Pendente'}</span></td>
                 <td><div style="display:flex;gap:4px;flex-wrap:wrap">
-                    <button class="abtn" onclick="openDrawerById(${r.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
+                    <button class="abtn" onclick="openDrawerById('${r.id}')" title="Ver detalhes"><i class="fas fa-eye"></i></button>
                     <button class="abtn confirm" onclick="togglePay(${r.id},'${r.pagamento}')" title="Alterar pagamento"><i class="fas fa-${r.pagamento==='confirmado'?'xmark':'check'}"></i></button>
                     <button class="abtn edit" onclick="openEditRevById(${r.id})" title="Editar"><i class="fas fa-pen"></i></button>
                     <button class="abtn del" onclick="delRev(${r.id})" title="Excluir"><i class="fas fa-trash"></i></button>
@@ -1975,15 +2020,22 @@ async function updateEqFilter() {
 
 async function openAddRev() {
     document.getElementById('revModalTitle').textContent = 'Adicionar Revisionista';
-    document.getElementById('rmId').value    = '';
-    document.getElementById('rmName').value  = '';
-    document.getElementById('rmCpf').value   = '';
-    document.getElementById('rmNasc').value  = '';
-    document.getElementById('rmPhone').value = '';
-    document.getElementById('rmSexo').value  = 'Masculino';
-    document.getElementById('rmRV').value    = getRV();
-    document.getElementById('rmPag').value   = 'pendente';
-    document.getElementById('rmLider').value = '';
+    document.getElementById('rmId').value       = '';
+    document.getElementById('rmName').value     = '';
+    document.getElementById('rmCpf').value      = '';
+    document.getElementById('rmNasc').value     = '';
+    document.getElementById('rmPhone').value    = '';
+    document.getElementById('rmSexo').value     = 'Masculino';
+    document.getElementById('rmRV').value       = getRV();
+    document.getElementById('rmPag').value      = 'pendente';
+    document.getElementById('rmLider').value    = '';
+    document.getElementById('rmEndereco').value = '';
+    document.getElementById('rmSaude').value    = '';
+    document.getElementById('rmRestr').value    = '';
+    document.getElementById('rmFilho').value    = '';
+    document.getElementById('rmEmerg').value    = '';
+    document.getElementById('rmExp').value      = '';
+    document.getElementById('rmWA').value       = '';
     await popEqSel();
     openModal('revModal');
 }
@@ -1992,15 +2044,22 @@ async function openEditRevById(id) {
     try {
         const r = await API.get(`/api/revisionistas/${id}`);
         document.getElementById('revModalTitle').textContent = 'Editar Revisionista';
-        document.getElementById('rmId').value    = id;
-        document.getElementById('rmName').value  = r.nome_completo||'';
-        document.getElementById('rmCpf').value   = r.cpf||'';
-        document.getElementById('rmNasc').value  = r.data_nascimento ? r.data_nascimento.slice(0,10) : '';
-        document.getElementById('rmPhone').value = r.telefone||'';
-        document.getElementById('rmSexo').value  = r.sexo||'Masculino';
-        document.getElementById('rmRV').value    = r.revisao||getRV();
-        document.getElementById('rmPag').value   = r.pagamento||'pendente';
-        document.getElementById('rmLider').value = r.lider_ou_convite||'';
+        document.getElementById('rmId').value       = id;
+        document.getElementById('rmName').value     = r.nome_completo||'';
+        document.getElementById('rmCpf').value      = r.cpf||'';
+        document.getElementById('rmNasc').value     = (() => { if (!r.data_nascimento) return ''; const v = String(r.data_nascimento); if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) { const [d,m,y] = v.split('/'); return y+'-'+m+'-'+d; } return v.slice(0,10); })();
+        document.getElementById('rmPhone').value    = r.telefone||'';
+        document.getElementById('rmSexo').value     = r.sexo||'Masculino';
+        document.getElementById('rmRV').value       = r.revisao||getRV();
+        document.getElementById('rmPag').value      = r.pagamento||'pendente';
+        document.getElementById('rmLider').value    = r.lider_ou_convite||'';
+        document.getElementById('rmEndereco').value = r.endereco||'';
+        document.getElementById('rmSaude').value    = r.condicao_saude||'';
+        document.getElementById('rmRestr').value    = r.restricao_alimentar||'';
+        document.getElementById('rmFilho').value    = r.informacao_filho||'';
+        document.getElementById('rmEmerg').value    = r.contatos_emergencia||'';
+        document.getElementById('rmExp').value      = r.expectativa||'';
+        document.getElementById('rmWA').value       = r.entrou_grupo_whatsapp||'';
         await popEqSel(r.equipe_id, r.celula_id);
         openModal('revModal');
     } catch(e) {}
@@ -2030,16 +2089,23 @@ async function saveRev() {
     const name = document.getElementById('rmName').value.trim();
     if (!name) { toast('Nome é obrigatório!','warn'); return; }
     const data = {
-        nome_completo:    name,
-        cpf:              document.getElementById('rmCpf').value,
-        data_nascimento:  document.getElementById('rmNasc').value || null,
-        telefone:         document.getElementById('rmPhone').value,
-        sexo:             document.getElementById('rmSexo').value,
-        revisao:          document.getElementById('rmRV').value,
-        pagamento:        document.getElementById('rmPag').value,
-        lider_ou_convite: document.getElementById('rmLider').value,
-        equipe_id:        document.getElementById('rmEq').value || null,
-        celula_id:        document.getElementById('rmCel').value || null,
+        nome_completo:          name,
+        cpf:                    document.getElementById('rmCpf').value,
+        data_nascimento:        document.getElementById('rmNasc').value || null,
+        telefone:               document.getElementById('rmPhone').value,
+        sexo:                   document.getElementById('rmSexo').value,
+        revisao:                document.getElementById('rmRV').value,
+        pagamento:              document.getElementById('rmPag').value,
+        lider_ou_convite:       document.getElementById('rmLider').value,
+        endereco:               document.getElementById('rmEndereco').value || null,
+        condicao_saude:         document.getElementById('rmSaude').value || null,
+        restricao_alimentar:    document.getElementById('rmRestr').value || null,
+        informacao_filho:       document.getElementById('rmFilho').value || null,
+        contatos_emergencia:    document.getElementById('rmEmerg').value || null,
+        expectativa:            document.getElementById('rmExp').value || null,
+        entrou_grupo_whatsapp:  document.getElementById('rmWA').value || null,
+        equipe_id:              document.getElementById('rmEq').value || null,
+        celula_id:              document.getElementById('rmCel').value || null,
         ativo: true
     };
     try {
@@ -2076,44 +2142,71 @@ async function finalizeRV() {
 async function openDrawerById(id) {
     try {
         const r = await API.get(`/api/revisionistas/${id}`);
-        document.getElementById('dname').textContent = r.nome_completo||'—';
+        
+        // Preenche os dados
+        document.getElementById('dname').textContent = r.nome_completo || '—';
         document.getElementById('dbadge').innerHTML = `
-            <span class="badge ${r.pagamento==='confirmado'?'b-green':'b-yellow'}"><i class="fas fa-${r.pagamento==='confirmado'?'check':'clock'}"></i>${r.pagamento==='confirmado'?'Pago':'Pendente'}</span>
-            <span class="badge b-blue" style="margin-left:5px"><i class="fas fa-tag"></i>${r.revisao||'—'}</span>`;
+            <span class="badge ${r.pagamento === 'confirmado' ? 'b-green' : 'b-yellow'}">
+                <i class="fas fa-${r.pagamento === 'confirmado' ? 'check' : 'clock'}"></i>
+                ${r.pagamento === 'confirmado' ? 'Pago' : 'Pendente'}
+            </span>
+            <span class="badge b-blue" style="margin-left:5px">
+                <i class="fas fa-tag"></i>${r.revisao || '—'}
+            </span>`;
+        
         const rows = [
-            ['fa-id-card','CPF',r.cpf||'—'],
-            ['fa-cake-candles','Nascimento',r.data_nascimento||'—'],
-            ['fa-venus-mars','Sexo',r.sexo||'—'],
-            ['fab fa-whatsapp','WhatsApp',r.telefone||'—'],
-            ['fa-house','Endereço',r.endereco||'—'],
-            ['fa-people-group','Equipe',r.equipe_nome||'—'],
-            ['fa-users','Célula',r.celula_nome||'—'],
-            ['fa-user-tie','Líder/Convite',r.lider_ou_convite||'—'],
-            ['fa-heart-pulse','Cond. Saúde',r.condicao_saude||'Nenhuma'],
-            ['fa-utensils','Rest. Alimentar',r.restricao_alimentar||'Nenhuma'],
-            ['fa-child','Filhos',r.informacao_filho||'Nenhum'],
-            ['fa-phone-volume','Contatos Emerg.',r.contatos_emergencia||'—'],
-            ['fa-star','Expectativa',r.expectativa||'—'],
-            ['fab fa-whatsapp','Grupo WA',r.entrou_grupo_whatsapp||'—'],
-            ['fa-calendar','Inscrição',r.data_inscricao?new Date(r.data_inscricao).toLocaleDateString('pt-BR'):'—'],
+            ['fa-id-card', 'CPF', r.cpf || '—'],
+            ['fa-cake-candles', 'Nascimento', r.data_nascimento || '—'],
+            ['fa-venus-mars', 'Sexo', r.sexo || '—'],
+            ['fab fa-whatsapp', 'WhatsApp', r.telefone || '—'],
+            ['fa-house', 'Endereço', r.endereco || '—'],
+            ['fa-people-group', 'Equipe', r.equipe_nome || '—'],
+            ['fa-users', 'Célula', r.celula_nome || '—'],
+            ['fa-user-tie', 'Líder/Convite', r.lider_ou_convite || '—'],
+            ['fa-heart-pulse', 'Cond. Saúde', r.condicao_saude || 'Nenhuma'],
+            ['fa-utensils', 'Rest. Alimentar', r.restricao_alimentar || 'Nenhuma'],
+            ['fa-child', 'Filhos', r.informacao_filho || 'Nenhum'],
+            ['fa-phone-volume', 'Contatos Emerg.', r.contatos_emergencia || '—'],
+            ['fa-star', 'Expectativa', r.expectativa || '—'],
+            ['fab fa-whatsapp', 'Grupo WA', r.entrou_grupo_whatsapp || '—'],
+            ['fa-calendar', 'Inscrição', r.data_inscricao ? new Date(r.data_inscricao).toLocaleDateString('pt-BR') : '—'],
         ];
-        document.getElementById('drows').innerHTML = rows.map(([ic,k,v]) =>
-            `<div class="irow"><div class="ikey"><i class="fas ${ic}"></i>${k}</div><div class="ival">${v}</div></div>`).join('');
+        document.getElementById('drows').innerHTML = rows.map(([ic, k, v]) =>
+            `<div class="irow"><div class="ikey"><i class="fas ${ic}"></i>${k}</div><div class="ival">${v}</div></div>`
+        ).join('');
+        
         document.getElementById('dactions').innerHTML = `
-            <button class="btn-p" onclick="togglePay(${r.id},'${r.pagamento}');closeDrawer()">
-                <i class="fas fa-${r.pagamento==='confirmado'?'xmark':'check'}"></i>
-                ${r.pagamento==='confirmado'?'Remover Pag.':'Confirmar Pag.'}
+            <button class="btn-p" onclick="togglePay(${r.id}, '${r.pagamento}'); closeDrawer()">
+                <i class="fas fa-${r.pagamento === 'confirmado' ? 'xmark' : 'check'}"></i>
+                ${r.pagamento === 'confirmado' ? 'Remover Pag.' : 'Confirmar Pag.'}
             </button>
-            <button class="btn-s" onclick="closeDrawer();openEditRevById(${r.id})"><i class="fas fa-pen"></i> Editar</button>
-            <button class="btn-d" onclick="closeDrawer();delRev(${r.id})"><i class="fas fa-trash"></i> Excluir</button>`;
-        document.getElementById('dbg').classList.add('open');
-    } catch(e) {
+            <button class="btn-s" onclick="closeDrawer(); openEditRevById(${r.id})"><i class="fas fa-pen"></i> Editar</button>
+            <button class="btn-d" onclick="closeDrawer(); delRev(${r.id})"><i class="fas fa-trash"></i> Excluir</button>`;
+        
+        // Exibe o drawer
+        const dbg = document.getElementById('dbg');
+        const drawer = document.getElementById('drawer');
+        dbg.style.display = 'block';
+        dbg.style.opacity = '1';
+        dbg.style.pointerEvents = 'all';
+        drawer.style.display = 'block';
+        drawer.style.transform = 'translateX(0)';
+        dbg.classList.add('open');
+    } catch (e) {
         console.error('openDrawerById erro:', e.message);
         toast('Erro ao carregar dados: ' + e.message, 'warn');
     }
 }
-function closeDrawer() { document.getElementById('dbg').classList.remove('open'); }
-
+function closeDrawer() {
+    const dbg = document.getElementById('dbg');
+    const drawer = document.getElementById('drawer');
+    dbg.style.display = 'none';
+    dbg.style.opacity = '0';
+    dbg.style.pointerEvents = 'none';
+    drawer.style.display = 'none';
+    drawer.style.transform = 'translateX(100%)';
+    dbg.classList.remove('open');
+}
 // ═══════════════════════════════
 //  EQUIPES
 // ═══════════════════════════════
@@ -2265,31 +2358,87 @@ async function renderRanking() {
 async function renderUsers() {
     try {
         const users = await API.get('/api/usuarios');
-        document.getElementById('usersBody').innerHTML = users.map(u => `<tr>
-            <td><code style="color:#38bdf8;font-size:.82rem">${u.username}</code></td>
-            <td>${u.name}</td>
-            <td><span class="badge ${u.role==='admin'?'b-blue':u.role==='lider'?'b-green':'b-gray'}"><i class="fas fa-${u.role==='admin'?'shield':u.role==='lider'?'user-tie':'eye'}"></i>${u.role}</span></td>
-            <td>${u.id!==1?`<button class="abtn del" onclick="delUser(${u.id})"><i class="fas fa-trash"></i> Excluir</button>`:'<span style="font-size:.73rem;color:var(--muted)"><i class="fas fa-lock" style="margin-right:4px"></i>Principal</span>'}</td>
-        </tr>`).join('');
+        document.getElementById('usersBody').innerHTML = users.map(u => {
+            const roleBadge = u.role === 'admin'
+                ? `<span class="badge b-blue"><i class="fas fa-shield"></i>admin</span>`
+                : u.role === 'lider'
+                ? `<span class="badge b-green"><i class="fas fa-user-tie"></i>líder</span>`
+                : `<span class="badge b-gray"><i class="fas fa-eye"></i>viewer</span>`;
+            const equipeCell = u.role === 'lider'
+                ? (u.equipe_nome
+                    ? `<div style="display:flex;align-items:center;gap:5px;font-size:.8rem"><i class="fas fa-people-group" style="color:var(--muted2);font-size:.72rem"></i>${u.equipe_nome}</div>`
+                    : `<span style="font-size:.73rem;color:var(--red)"><i class="fas fa-triangle-exclamation" style="margin-right:3px"></i>Sem equipe</span>`)
+                : `<span style="color:var(--muted);font-size:.75rem">—</span>`;
+            return `<tr>
+                <td><code style="color:#38bdf8;font-size:.82rem">${u.username}</code></td>
+                <td>${u.name}</td>
+                <td>${roleBadge}</td>
+                <td>${equipeCell}</td>
+                <td>${u.id !== 1
+                    ? `<button class="abtn del" onclick="delUser(${u.id})"><i class="fas fa-trash"></i> Excluir</button>`
+                    : '<span style="font-size:.73rem;color:var(--muted)"><i class="fas fa-lock" style="margin-right:4px"></i>Principal</span>'
+                }</td>
+            </tr>`;
+        }).join('');
     } catch(e) {}
 }
 
-async function saveUser() {
-    const u=document.getElementById('umUser').value.trim();
-    const n=document.getElementById('umName').value.trim();
-    const p=document.getElementById('umPass').value;
-    const r=document.getElementById('umRole').value;
-    if(!u||!n||!p){toast('Preencha todos os campos!','warn');return;}
+async function openUserModal() {
+    // Reset campos
+    document.getElementById('umUser').value = '';
+    document.getElementById('umName').value = '';
+    document.getElementById('umPass').value = '';
+    document.getElementById('umRole').value = 'admin';
+
+    // Popula equipes no select
+    const sel = document.getElementById('umEquipe');
     try {
-        await API.post('/api/usuarios',{username:u,name:n,password:p,role:r});
-        closeModal('userModal'); renderUsers(); toast('Usuário criado!','ok');
+        const eqs = await getEquipes();
+        sel.innerHTML = '<option value="">— Selecione a equipe —</option>' +
+            eqs.map(e => `<option value="${e.id}">${e.name}${e.leader ? ' — ' + e.leader : ''}</option>`).join('');
+    } catch(e) {
+        sel.innerHTML = '<option value="">Erro ao carregar equipes</option>';
+    }
+
+    // Garante que o campo de equipe começa oculto (role padrão = admin)
+    document.getElementById('umEquipeGrp').style.display = 'none';
+
+    openModal('userModal');
+}
+
+function toggleEquipeField() {
+    const role = document.getElementById('umRole').value;
+    document.getElementById('umEquipeGrp').style.display = role === 'lider' ? 'block' : 'none';
+}
+
+async function saveUser() {
+    const u = document.getElementById('umUser').value.trim();
+    const n = document.getElementById('umName').value.trim();
+    const p = document.getElementById('umPass').value;
+    const r = document.getElementById('umRole').value;
+    const eqId = document.getElementById('umEquipe').value;
+
+    if (!u || !n || !p) { toast('Preencha todos os campos!', 'warn'); return; }
+    if (r === 'lider' && !eqId) { toast('Selecione a equipe do líder!', 'warn'); return; }
+
+    try {
+        await API.post('/api/usuarios', {
+            username: u,
+            name:     n,
+            password: p,
+            role:     r,
+            equipe_id: r === 'lider' ? parseInt(eqId) : null
+        });
+        closeModal('userModal');
+        renderUsers();
+        toast('Usuário criado!', 'ok');
     } catch(e) {}
 }
 
 async function delUser(id) {
-    if(!confirm('Excluir usuário?'))return;
-    try { await API.delete(`/api/usuarios/${id}`); renderUsers(); toast('Excluído.','ok'); }
-    catch(e){}
+    if (!confirm('Excluir usuário?')) return;
+    try { await API.delete(`/api/usuarios/${id}`); renderUsers(); toast('Excluído.', 'ok'); }
+    catch(e) {}
 }
 
 
