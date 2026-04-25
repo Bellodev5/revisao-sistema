@@ -603,6 +603,7 @@ app.get('/api/ranking', async (req, res) => {
             FROM celulas c
             JOIN equipes e ON e.id=c.equipe_id
             LEFT JOIN revisionistas r ON r.celula_id=c.id AND r.ativo=TRUE ${rvFilter}
+            WHERE LOWER(c.nome) NOT LIKE '%geral%'
             GROUP BY c.id, c.nome, c.lider, e.name, e.color ORDER BY total DESC
         `);
 
