@@ -56,7 +56,11 @@ async function ensureSchema() {
     _schemaReady = (async () => {
         await q(`ALTER TABLE celulas  ADD COLUMN IF NOT EXISTS co_lider VARCHAR(200)`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS slug VARCHAR(60)`);
-        await q(`CREATE UNIQUE INDEX IF NOT EXISTS idx_revisoes_slug ON revisoes(slug) WHERE slug IS NOT NULL`);
+        // Drop unique constraint global se existir (migra pra unique parcial: só não-finalizadas)
+        await q(`ALTER TABLE revisoes DROP CONSTRAINT IF EXISTS revisoes_slug_key`);
+        await q(`DROP INDEX IF EXISTS idx_revisoes_slug`);
+        // Unique apenas para revisões NÃO-FINALIZADAS — antigas finalizadas podem ter slug "duplicado" no histórico
+        await q(`CREATE UNIQUE INDEX IF NOT EXISTS idx_revisoes_slug_ativo ON revisoes(slug) WHERE slug IS NOT NULL AND finalizado = FALSE`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS nome VARCHAR(200)`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS data_inicio DATE`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS data_fim DATE`);
@@ -721,7 +725,13 @@ app.post('/api/revisoes', async (req, res) => {
             });
         }
         if (finalizar_anterior && ativasComMesmoSlug.length) {
-            await q(`UPDATE revisoes SET finalizado=TRUE WHERE slug=$1 AND finalizado=FALSE`, [cleanSlug]);
+            // Finaliza E adiciona sufixo único ao slug antigo (preserva histórico, libera slug)
+            await q(`
+                UPDATE revisoes
+                   SET finalizado = TRUE,
+                       slug = $1 || '-' || ano || '-' || id
+                 WHERE slug = $1 AND finalizado = FALSE
+            `, [cleanSlug]);
         }
 
         const anoFinal = parseInt(ano) || new Date().getFullYear();
