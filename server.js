@@ -49,11 +49,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Rota de teste rápido
 app.get('/api/ping', (req, res) => res.json({ ok: true, timestamp: new Date().toISOString() }));
 
-// ensure co_lider column exists + revisoes extras
-(async () => {
-    try {
-        await q(`ALTER TABLE celulas ADD COLUMN IF NOT EXISTS co_lider VARCHAR(200)`);
-        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS slug VARCHAR(60) UNIQUE`);
+// ensure schema — promise cached para serverless cold-start safe
+let _schemaReady = null;
+async function ensureSchema() {
+    if (_schemaReady) return _schemaReady;
+    _schemaReady = (async () => {
+        await q(`ALTER TABLE celulas  ADD COLUMN IF NOT EXISTS co_lider VARCHAR(200)`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS slug VARCHAR(60)`);
+        await q(`CREATE UNIQUE INDEX IF NOT EXISTS idx_revisoes_slug ON revisoes(slug) WHERE slug IS NOT NULL`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS nome VARCHAR(200)`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS data_inicio DATE`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS data_fim DATE`);
@@ -63,8 +66,11 @@ app.get('/api/ping', (req, res) => res.json({ ok: true, timestamp: new Date().to
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS tipo VARCHAR(40) DEFAULT 'adultos'`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS instagram TEXT`);
         await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS whatsapp_grupo TEXT`);
-    } catch(e) { /* ignore */ }
-})();
+    })().catch(e => { _schemaReady = null; throw e; });
+    return _schemaReady;
+}
+// Boot best-effort
+ensureSchema().catch(()=>{});
 
 // ─── HELPER ───────────────────────────────────────────────────
 const ok  = (res, data) => res.json({ success: true,  data });
@@ -627,6 +633,7 @@ app.get('/api/ranking', async (req, res) => {
 // GET /api/revisoes — lista todas (mais recentes primeiro)
 app.get('/api/revisoes', async (req, res) => {
     try {
+        await ensureSchema();
         const { rows } = await q(`
             SELECT id, codigo, slug, nome, descricao, ano, tipo, ativo, finalizado,
                    data_inicio, data_fim, local,
@@ -642,6 +649,7 @@ app.get('/api/revisoes', async (req, res) => {
 // GET /api/revisoes/ativa — RV ativa atual (configurada em config.rv_ativa)
 app.get('/api/revisoes/ativa', async (req, res) => {
     try {
+        await ensureSchema();
         const { rows: cfg } = await q("SELECT valor FROM config WHERE chave='rv_ativa'");
         const codigoAtivo = cfg[0]?.valor || 'RV1';
         const { rows } = await q(`SELECT * FROM revisoes WHERE codigo=$1 LIMIT 1`, [codigoAtivo]);
@@ -653,6 +661,7 @@ app.get('/api/revisoes/ativa', async (req, res) => {
 // GET /api/revisoes/:slug — busca por slug (para link público /rv100)
 app.get('/api/revisoes/:slug', async (req, res) => {
     try {
+        await ensureSchema();
         const { slug } = req.params;
         const { rows } = await q(`SELECT * FROM revisoes WHERE slug=$1 OR LOWER(codigo)=LOWER($1) LIMIT 1`, [slug]);
         if (!rows.length) return err(res, 'Revisão não encontrada', 404);
@@ -663,6 +672,7 @@ app.get('/api/revisoes/:slug', async (req, res) => {
 // POST /api/revisoes — cria nova
 app.post('/api/revisoes', async (req, res) => {
     try {
+        await ensureSchema();
         const {
             codigo, slug, nome, descricao, ano, tipo,
             data_inicio, data_fim, local,
@@ -698,6 +708,7 @@ app.post('/api/revisoes', async (req, res) => {
 // PATCH /api/revisoes/:id — atualiza campos
 app.patch('/api/revisoes/:id', async (req, res) => {
     try {
+        await ensureSchema();
         const {
             nome, descricao, tipo, data_inicio, data_fim, local,
             valor_com_transporte, valor_sem_transporte,
@@ -737,6 +748,7 @@ app.patch('/api/revisoes/:id', async (req, res) => {
 // DELETE /api/revisoes/:id — só remove se NÃO houver inscrições
 app.delete('/api/revisoes/:id', async (req, res) => {
     try {
+        await ensureSchema();
         const { rows: rev } = await q('SELECT codigo FROM revisoes WHERE id=$1', [req.params.id]);
         if (!rev.length) return err(res, 'Revisão não encontrada', 404);
         const codigo = rev[0].codigo;
