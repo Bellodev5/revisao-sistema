@@ -650,15 +650,35 @@ app.get('/api/revisoes', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-// GET /api/revisoes/ativa — RV ativa atual (configurada em config.rv_ativa)
+// GET /api/revisoes/ativa — a Revisão GERAL atual (mais recente não-finalizada com tipo=geral)
+// Fallback: rv_ativa configurada → mais recente não-finalizada de qualquer tipo → mais recente em geral
 app.get('/api/revisoes/ativa', async (req, res) => {
     try {
         await ensureSchema();
+        // 1. Geral não-finalizada mais recente
+        let { rows } = await q(`
+            SELECT * FROM revisoes
+             WHERE tipo='geral' AND finalizado=FALSE
+             ORDER BY ano DESC NULLS LAST, created_at DESC
+             LIMIT 1
+        `);
+        if (rows.length) return ok(res, rows[0]);
+
+        // 2. Fallback: rv_ativa configurada manualmente
         const { rows: cfg } = await q("SELECT valor FROM config WHERE chave='rv_ativa'");
-        const codigoAtivo = cfg[0]?.valor || 'RV1';
-        const { rows } = await q(`SELECT * FROM revisoes WHERE codigo=$1 LIMIT 1`, [codigoAtivo]);
-        if (!rows.length) return err(res, 'RV ativa não encontrada', 404);
-        ok(res, rows[0]);
+        if (cfg[0]?.valor) {
+            const { rows: r2 } = await q(`SELECT * FROM revisoes WHERE codigo=$1 LIMIT 1`, [cfg[0].valor]);
+            if (r2.length) return ok(res, r2[0]);
+        }
+
+        // 3. Última criada qualquer
+        ({ rows } = await q(`
+            SELECT * FROM revisoes
+             ORDER BY finalizado ASC, ano DESC NULLS LAST, created_at DESC
+             LIMIT 1
+        `));
+        if (rows.length) return ok(res, rows[0]);
+        err(res, 'Nenhuma revisão cadastrada', 404);
     } catch(e) { err(res, e.message, 500); }
 });
 

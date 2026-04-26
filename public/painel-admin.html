@@ -744,9 +744,6 @@
                 <div class="nav-item" id="nav-revisoes" onclick="showView('revisoes')">
                     <span class="ni"><i class="fas fa-calendar-plus"></i></span> Revisões
                 </div>
-                <div class="nav-item" id="nav-site" onclick="showView('site')">
-                    <span class="ni"><i class="fas fa-globe"></i></span> Site
-                </div>
                 <div class="nav-item" id="nav-usuarios" onclick="showView('usuarios')">
                     <span class="ni"><i class="fas fa-user-gear"></i></span> Usuários
                 </div>
@@ -774,12 +771,8 @@
                     <div class="pg-sub">Visão geral em tempo real</div>
                 </div>
                 <div class="topbar-right">
-                    <select class="fsel-sm" id="dashRV" onchange="renderDashboard()">
+                    <select class="fsel-sm" id="dashRV" data-rv-filter onchange="renderDashboard()">
                         <option value="all">Todas as Revisões</option>
-                        <option value="RV1">RV1 — Jan/Mar</option>
-                        <option value="RV2">RV2 — Abr/Jun</option>
-                        <option value="RV3">RV3 — Jul/Set</option>
-                        <option value="RV4">RV4 — Out/Dez</option>
                     </select>
                     <button class="btn-d" onclick="openModal('finalizeModal')">
                         <i class="fas fa-flag-checkered"></i> Finalizar Revisão
@@ -826,10 +819,8 @@
                 </div>
                 <div class="filters">
                     <input type="text" class="fsearch" id="srch" placeholder="&#xf002;  Buscar por nome, CPF, telefone..." oninput="renderRevs()">
-                    <select class="fsel-sm" id="fRV" onchange="renderRevs()">
+                    <select class="fsel-sm" id="fRV" data-rv-filter onchange="renderRevs()">
                         <option value="all">Todas as RV</option>
-                        <option value="RV1">RV1</option><option value="RV2">RV2</option>
-                        <option value="RV3">RV3</option><option value="RV4">RV4</option>
                     </select>
                     <select class="fsel-sm" id="fPag" onchange="renderRevs()">
                         <option value="all">Todos pagamentos</option>
@@ -890,10 +881,8 @@
                         <div class="pg-title"><i class="fas fa-trophy"></i> Ranking</div>
                         <div class="pg-sub">Equipes e células que mais levaram</div>
                     </div>
-                    <select class="fsel-sm" id="rankRV" onchange="renderRanking()">
+                    <select class="fsel-sm" id="rankRV" data-rv-filter onchange="renderRanking()">
                         <option value="all">Todas as RV</option>
-                        <option value="RV1">RV1</option><option value="RV2">RV2</option>
-                        <option value="RV3">RV3</option><option value="RV4">RV4</option>
                     </select>
                 </div>
                 <div class="grid2">
@@ -922,12 +911,8 @@
                         <div class="pg-sub" id="obSub">Gerenciar inscrições de obreiros</div>
                     </div>
                     <div class="topbar-right">
-                        <select class="fsel-sm" id="obFiltroRV" onchange="renderObreiros()">
+                        <select class="fsel-sm" id="obFiltroRV" data-rv-filter onchange="renderObreiros()">
                             <option value="all">Todas as RV</option>
-                            <option value="RV1">RV1</option>
-                            <option value="RV2">RV2</option>
-                            <option value="RV3">RV3</option>
-                            <option value="RV4">RV4</option>
                         </select>
                         <select class="fsel-sm" id="obFiltroApto" onchange="renderObreiros()">
                             <option value="all">Todos os status</option>
@@ -1670,6 +1655,8 @@ async function initApp() {
         if (el) el.value = _rvAtiva;
     });
 
+    // Carrega revisões primeiro (popula filtros antes do dashboard renderizar)
+    await renderRevisoes();
     renderDashboard();
     renderRevs();
     renderTeams();
@@ -2972,12 +2959,39 @@ function getRV() {
 // ═══════════════════════════════════════════
 let _REVISOES = [];
 
+// Popula todos os <select data-rv-filter> com a lista de revisões
+function populateRVFilters() {
+    if (!_REVISOES.length) return;
+    document.querySelectorAll('select[data-rv-filter]').forEach(sel => {
+        const cur = sel.value;
+        // Mantém option "all" que já existe
+        const fixed = Array.from(sel.querySelectorAll('option')).filter(o => o.value === 'all' || o.value === '');
+        sel.innerHTML = '';
+        fixed.forEach(o => sel.appendChild(o));
+        // Ordena: ativas primeiro, depois finalizadas, por ano DESC
+        const ord = [..._REVISOES].sort((a,b) => {
+            if (a.finalizado !== b.finalizado) return a.finalizado ? 1 : -1;
+            return (b.ano || 0) - (a.ano || 0);
+        });
+        ord.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.codigo;
+            const nomeShort = r.nome ? r.nome.replace(/^Revisão\s+(de\s+)?/i, '') : '';
+            const labelBase = nomeShort ? `${r.codigo} · ${nomeShort}` : r.codigo;
+            opt.textContent = r.finalizado ? `${labelBase} (concluída)` : labelBase;
+            sel.appendChild(opt);
+        });
+        if (cur && Array.from(sel.options).some(o => o.value === cur)) sel.value = cur;
+    });
+}
+
 async function renderRevisoes() {
     const cont = document.getElementById('revisoesList');
-    if (!cont) return;
     try {
         const r = await API.get('/api/revisoes');
         _REVISOES = (r.success ? r.data : r) || [];
+        populateRVFilters();
+        if (!cont) return;
         if (!_REVISOES.length) {
             cont.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">Nenhuma revisão cadastrada. <button onclick="openRevisaoModal()" style="background:var(--accent);border:none;color:#fff;padding:7px 14px;border-radius:6px;cursor:pointer;margin-left:8px"><i class="fas fa-plus"></i> Criar a primeira</button></div>`;
             return;
