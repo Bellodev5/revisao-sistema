@@ -3035,7 +3035,10 @@ function copyLink(url) {
 
 function openRevisaoModal(id) {
     const rv = id ? _REVISOES.find(x => x.id === id) : null;
-    document.getElementById('revisaoModalTitle').textContent = rv ? `Editar ${rv.codigo}` : 'Nova Revisão';
+    const concluida = !!(rv && rv.finalizado);
+    document.getElementById('revisaoModalTitle').textContent = rv
+        ? (concluida ? `${rv.codigo} · Concluída` : `Editar ${rv.codigo}`)
+        : 'Nova Revisão';
     document.getElementById('revEditId').value      = rv?.id || '';
     document.getElementById('revNome').value        = rv?.nome || '';
     document.getElementById('revCodigo').value      = rv?.codigo || '';
@@ -3050,11 +3053,55 @@ function openRevisaoModal(id) {
     document.getElementById('revValorSem').value    = rv?.valor_sem_transporte ?? '';
     document.getElementById('revAtivo').checked     = rv ? !!rv.ativo : true;
     document.getElementById('revFinalizado').checked= rv ? !!rv.finalizado : false;
-    // bloqueia código quando edita (FK em revisionistas.revisao)
+
+    // Trava todos os campos editáveis se concluída (modo só-leitura)
+    const inputs = ['revNome','revSlug','revTipo','revAno','revDescricao','revDataInicio','revDataFim','revLocal','revValorCom','revValorSem','revAtivo','revFinalizado'];
+    inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = concluida;
+    });
+    // bloqueia código sempre quando edita (FK em revisionistas.revisao)
     document.getElementById('revCodigo').disabled = !!rv;
-    document.getElementById('revDelBtn').style.display = rv ? 'inline-flex' : 'none';
+    document.getElementById('revDelBtn').style.display = (rv && !concluida) ? 'inline-flex' : 'none';
+
+    // Banner concluída + alterna botões
+    let banner = document.getElementById('revConcluidaBanner');
+    if (banner) banner.remove();
+    const saveBtn   = document.querySelector('#revisaoModal button[onclick="saveRevisao()"]');
+    const reabrirBtn= document.getElementById('revReabrirBtn');
+    if (concluida) {
+        const html = `
+          <div id="revConcluidaBanner" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:.7rem 1rem;display:flex;align-items:center;gap:10px;margin-bottom:.5rem;color:#fcd34d;font-size:.86rem">
+            <i class="fas fa-flag-checkered"></i>
+            <div><strong>Revisão concluída</strong> — esta edição já aconteceu. Os dados estão travados pra preservar histórico.</div>
+          </div>`;
+        const body = document.querySelector('#revisaoModal .modal-body');
+        if (body) body.insertAdjacentHTML('afterbegin', html);
+        if (saveBtn) saveBtn.style.display = 'none';
+        if (!reabrirBtn) {
+            const foot = document.querySelector('#revisaoModal .modal-foot');
+            if (foot) foot.insertAdjacentHTML('beforeend', `<button id="revReabrirBtn" onclick="reabrirRevisao()" style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);color:#fbbf24;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:500"><i class="fas fa-rotate-left"></i> Reabrir edição</button>`);
+        } else { reabrirBtn.style.display = 'inline-flex'; }
+    } else {
+        if (saveBtn) saveBtn.style.display = '';
+        if (reabrirBtn) reabrirBtn.style.display = 'none';
+    }
+
     updateRevLinkPreview();
     document.getElementById('revisaoModal').classList.add('open');
+}
+
+async function reabrirRevisao() {
+    const id = document.getElementById('revEditId').value;
+    if (!id) return;
+    if (!confirm('Tem certeza que quer REABRIR a edição? Isso vai destravar todos os campos. Use só em casos especiais.')) return;
+    try {
+        await API.patch(`/api/revisoes/${id}`, { finalizado: false });
+        toast('Revisão reaberta — agora pode editar');
+        // Recarrega lista e reabre modal
+        await renderRevisoes();
+        openRevisaoModal(parseInt(id));
+    } catch(e) { toast(e.message || 'Erro ao reabrir', 'warn'); }
 }
 function closeRevisaoModal() { document.getElementById('revisaoModal').classList.remove('open'); }
 
