@@ -92,6 +92,16 @@
       "dest": "/public/$1"
     },
     {
+      "src": "/[a-z0-9][a-z0-9-]*",
+      "has": [
+        {
+          "type": "host",
+          "value": "inscricaorv.saraitapema.com.br"
+        }
+      ],
+      "dest": "/public/inscricao.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/public/$1"
     }

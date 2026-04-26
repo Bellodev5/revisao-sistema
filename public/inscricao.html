@@ -357,15 +357,15 @@
 <!-- HERO -->
 <header class="hero">
     <div class="hero-content">
-        <div class="pill">
+        <div class="pill" id="rvPill">
             Sara Itapema &mdash; Ano do Refrigério
         </div>
-        <h1>Revisão<br>de <span>Vidas 2026</span></h1>
-        <p class="hero-sub">3 dias que vão transformar sua história para sempre</p>
+        <h1 id="rvTitle">Revisão<br>de <span>Vidas 2026</span></h1>
+        <p class="hero-sub" id="rvSub">3 dias que vão transformar sua história para sempre</p>
         <div class="hero-img">
             <img src="revisaoGeral.jpeg" alt="Revisão de Vidas"
                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            
+
         </div>
     </div>
     <div class="scroll-cue">
@@ -385,13 +385,13 @@
             <div class="icard">
                 <div class="icard-icon"><i class="fas fa-calendar-days"></i></div>
                 <div class="icard-lbl">Datas</div>
-                <div class="icard-val">27, 28 e 29 de Março</div>
+                <div class="icard-val" id="rvDatas">—</div>
                 <div class="icard-sub">3 dias de imersão espiritual</div>
             </div>
             <div class="icard">
                 <div class="icard-icon"><i class="fas fa-location-dot"></i></div>
                 <div class="icard-lbl">Local</div>
-                <div class="icard-val">Chácara Nova Canaã</div>
+                <div class="icard-val" id="rvLocal">—</div>
                 <div class="icard-sub">Ambiente preparado especialmente para você</div>
             </div>
         
@@ -573,12 +573,12 @@
       <h3 class="m-title">Inscrição Enviada!</h3>
       <p class="m-text">Sua inscrição foi recebida com sucesso.<br>Bem-Vindo ao Revisão de Vidas! Se prepare para viver coisas grandiosas no Senhor.</p>
   
-      <div class="pix-box">
+      <div class="pix-box" id="rvPriceBox">
         <div class="pix-lbl"><i class="fas fa-wallet"></i> Investimento</div>
         <p class="m-text" style="margin-bottom:.6rem;font-size:.77rem;font-style:italic">Hospedagem + alimentação inclusos</p>
-        <div class="price-pills">
-          <div class="ppill"><strong>R$ 320</strong>com transporte</div>
-          <div class="ppill"><strong>R$ 300</strong>sem transporte</div>
+        <div class="price-pills" id="rvPrices">
+          <div class="ppill"><strong>R$ —</strong>com transporte</div>
+          <div class="ppill"><strong>R$ —</strong>sem transporte</div>
         </div>
       </div>
   
@@ -714,6 +714,88 @@ function onEquipeChange() {
 
 // Carrega assim que a página abre
 carregarEquipes();
+carregarRevisao();
+
+// ── REVISÃO DINÂMICA ──────────────────────────────────────────
+async function carregarRevisao() {
+    // Detecta slug do path: ex /rv100, /rv1, /adultos
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, '').split('/')[0].toLowerCase();
+    const isSlug = path && /^[a-z0-9][a-z0-9-]*$/.test(path) && path !== 'inscricao.html' && path !== 'painel' && path !== 'lideres' && path !== 'obreiros';
+
+    let endpoint = `${API_BASE}/api/revisoes/ativa`;
+    if (isSlug) endpoint = `${API_BASE}/api/revisoes/${encodeURIComponent(path)}`;
+
+    try {
+        const r = await fetch(endpoint);
+        if (!r.ok) return; // mantém defaults se falhar
+        const j = await r.json();
+        if (!j.success || !j.data) return;
+        const rv = j.data;
+        window._RV_CARREGADA = rv;
+        renderRV(rv);
+    } catch(e) {
+        console.warn('[carregarRevisao]', e.message);
+    }
+}
+
+function fmtDate(s) {
+    if (!s) return '';
+    // ISO 'YYYY-MM-DD' ou 'YYYY-MM-DDT...'
+    const m = String(s).slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return s;
+    return `${parseInt(m[3])}/${parseInt(m[2])}/${m[1]}`;
+}
+function fmtDataRange(ini, fim) {
+    if (!ini && !fim) return '—';
+    if (ini && !fim) return fmtDate(ini);
+    const a = String(ini).slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const b = String(fim).slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!a || !b) return `${fmtDate(ini)} a ${fmtDate(fim)}`;
+    const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    if (a[1]===b[1] && a[2]===b[2]) {
+        return `${parseInt(a[3])}, ${parseInt(b[3])} de ${meses[parseInt(a[2])-1]}`;
+    }
+    return `${fmtDate(ini)} a ${fmtDate(fim)}`;
+}
+function fmtMoney(v) {
+    if (v === null || v === undefined || v === '') return '—';
+    const n = Number(v);
+    if (isNaN(n)) return '—';
+    return n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function renderRV(rv) {
+    if (!rv) return;
+    const titleEl = document.getElementById('rvTitle');
+    const subEl   = document.getElementById('rvSub');
+    const datasEl = document.getElementById('rvDatas');
+    const localEl = document.getElementById('rvLocal');
+    const pricesEl= document.getElementById('rvPrices');
+    document.title = (rv.nome || 'Revisão') + ' — Sara Itapema';
+
+    if (titleEl) {
+        const ano = rv.ano || new Date().getFullYear();
+        const nome = rv.nome || 'Revisão de Vidas';
+        // se nome contém número (ex: "Revisão 100"), usar tal qual
+        if (/\d/.test(nome)) {
+            const partes = nome.split(' ');
+            const ult = partes.pop();
+            titleEl.innerHTML = `${partes.join(' ')}<br><span>${ult} ${ano}</span>`;
+        } else {
+            titleEl.innerHTML = `${nome.split(' ')[0]}<br>de <span>${nome.split(' ').slice(1).join(' ') || 'Vidas'} ${ano}</span>`;
+        }
+    }
+    if (subEl && rv.descricao)        subEl.textContent   = rv.descricao;
+    if (datasEl)                      datasEl.textContent = fmtDataRange(rv.data_inicio, rv.data_fim);
+    if (localEl)                      localEl.textContent = rv.local || '—';
+    if (pricesEl) {
+        const com = fmtMoney(rv.valor_com_transporte);
+        const sem = fmtMoney(rv.valor_sem_transporte);
+        pricesEl.innerHTML =
+            `<div class="ppill"><strong>R$ ${com}</strong>com transporte</div>` +
+            `<div class="ppill"><strong>R$ ${sem}</strong>sem transporte</div>`;
+    }
+}
 
 // ── FORM SUBMIT ───────────────────────────────────────────────
 document.getElementById('regForm').addEventListener('submit', async e => {
@@ -734,12 +816,16 @@ document.getElementById('regForm').addEventListener('submit', async e => {
     delete data.restricao_alimentar_yn;
     delete data.informacao_filho_yn;
 
-    // Revisão: busca a ativa no banco, fallback por mês
-    try {
-        const cfgResp = await fetch(`${API_BASE}/api/config`);
-        const cfgJson = await cfgResp.json();
-        data.revisao = (cfgJson.success && cfgJson.data?.rv_ativa) ? cfgJson.data.rv_ativa : null;
-    } catch(e) { data.revisao = null; }
+    // Revisão: usa a RV carregada (dinâmica via slug ou ativa)
+    if (window._RV_CARREGADA && window._RV_CARREGADA.codigo) {
+        data.revisao = window._RV_CARREGADA.codigo;
+    } else {
+        try {
+            const cfgResp = await fetch(`${API_BASE}/api/config`);
+            const cfgJson = await cfgResp.json();
+            data.revisao = (cfgJson.success && cfgJson.data?.rv_ativa) ? cfgJson.data.rv_ativa : null;
+        } catch(e) { data.revisao = null; }
+    }
     if (!data.revisao) {
         const m = new Date().getMonth() + 1;
         data.revisao = m<=3?'RV1':m<=6?'RV2':m<=9?'RV3':'RV4';

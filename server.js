@@ -49,10 +49,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Rota de teste rápido
 app.get('/api/ping', (req, res) => res.json({ ok: true, timestamp: new Date().toISOString() }));
 
-// ensure co_lider column exists
+// ensure co_lider column exists + revisoes extras
 (async () => {
     try {
         await q(`ALTER TABLE celulas ADD COLUMN IF NOT EXISTS co_lider VARCHAR(200)`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS slug VARCHAR(60) UNIQUE`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS nome VARCHAR(200)`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS data_inicio DATE`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS data_fim DATE`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS local TEXT`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS valor_com_transporte NUMERIC(10,2)`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS valor_sem_transporte NUMERIC(10,2)`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS tipo VARCHAR(40) DEFAULT 'adultos'`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS instagram TEXT`);
+        await q(`ALTER TABLE revisoes ADD COLUMN IF NOT EXISTS whatsapp_grupo TEXT`);
     } catch(e) { /* ignore */ }
 })();
 
@@ -612,6 +622,134 @@ app.get('/api/ranking', async (req, res) => {
 });
 
 
+// ─── REVISÕES (CRUD) ──────────────────────────────────────────
+
+// GET /api/revisoes — lista todas (mais recentes primeiro)
+app.get('/api/revisoes', async (req, res) => {
+    try {
+        const { rows } = await q(`
+            SELECT id, codigo, slug, nome, descricao, ano, tipo, ativo, finalizado,
+                   data_inicio, data_fim, local,
+                   valor_com_transporte, valor_sem_transporte,
+                   instagram, whatsapp_grupo, created_at
+              FROM revisoes
+             ORDER BY ativo DESC, created_at DESC
+        `);
+        ok(res, rows);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// GET /api/revisoes/ativa — RV ativa atual (configurada em config.rv_ativa)
+app.get('/api/revisoes/ativa', async (req, res) => {
+    try {
+        const { rows: cfg } = await q("SELECT valor FROM config WHERE chave='rv_ativa'");
+        const codigoAtivo = cfg[0]?.valor || 'RV1';
+        const { rows } = await q(`SELECT * FROM revisoes WHERE codigo=$1 LIMIT 1`, [codigoAtivo]);
+        if (!rows.length) return err(res, 'RV ativa não encontrada', 404);
+        ok(res, rows[0]);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// GET /api/revisoes/:slug — busca por slug (para link público /rv100)
+app.get('/api/revisoes/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const { rows } = await q(`SELECT * FROM revisoes WHERE slug=$1 OR LOWER(codigo)=LOWER($1) LIMIT 1`, [slug]);
+        if (!rows.length) return err(res, 'Revisão não encontrada', 404);
+        ok(res, rows[0]);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// POST /api/revisoes — cria nova
+app.post('/api/revisoes', async (req, res) => {
+    try {
+        const {
+            codigo, slug, nome, descricao, ano, tipo,
+            data_inicio, data_fim, local,
+            valor_com_transporte, valor_sem_transporte,
+            instagram, whatsapp_grupo, ativo
+        } = req.body;
+        if (!codigo || !slug || !nome) return err(res, 'codigo, slug e nome são obrigatórios');
+        const cleanSlug = String(slug).trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+        if (!cleanSlug) return err(res, 'slug inválido');
+        // Garante que slug e codigo são únicos
+        const { rows: dup } = await q(`SELECT id FROM revisoes WHERE codigo=$1 OR slug=$2`, [codigo, cleanSlug]);
+        if (dup.length) return err(res, 'Já existe revisão com esse código ou slug', 409);
+        const anoFinal = parseInt(ano) || new Date().getFullYear();
+        const { rows } = await q(`
+            INSERT INTO revisoes (
+                codigo, slug, nome, descricao, ano, tipo,
+                data_inicio, data_fim, local,
+                valor_com_transporte, valor_sem_transporte,
+                instagram, whatsapp_grupo, ativo
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+            RETURNING *
+        `, [
+            codigo, cleanSlug, nome, descricao || null, anoFinal, tipo || 'adultos',
+            data_inicio || null, data_fim || null, local || null,
+            valor_com_transporte || null, valor_sem_transporte || null,
+            instagram || null, whatsapp_grupo || null,
+            ativo === false ? false : true
+        ]);
+        ok(res, rows[0]);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// PATCH /api/revisoes/:id — atualiza campos
+app.patch('/api/revisoes/:id', async (req, res) => {
+    try {
+        const {
+            nome, descricao, tipo, data_inicio, data_fim, local,
+            valor_com_transporte, valor_sem_transporte,
+            instagram, whatsapp_grupo, ativo, finalizado, slug
+        } = req.body;
+        const cleanSlug = slug ? String(slug).trim().toLowerCase().replace(/[^a-z0-9-]/g, '') : null;
+        const { rows } = await q(`
+            UPDATE revisoes SET
+                nome                  = COALESCE($1,  nome),
+                descricao             = COALESCE($2,  descricao),
+                tipo                  = COALESCE($3,  tipo),
+                data_inicio           = COALESCE($4,  data_inicio),
+                data_fim              = COALESCE($5,  data_fim),
+                local                 = COALESCE($6,  local),
+                valor_com_transporte  = COALESCE($7,  valor_com_transporte),
+                valor_sem_transporte  = COALESCE($8,  valor_sem_transporte),
+                instagram             = COALESCE($9,  instagram),
+                whatsapp_grupo        = COALESCE($10, whatsapp_grupo),
+                ativo                 = COALESCE($11, ativo),
+                finalizado            = COALESCE($12, finalizado),
+                slug                  = COALESCE($13, slug)
+            WHERE id=$14 RETURNING *
+        `, [
+            nome || null, descricao || null, tipo || null,
+            data_inicio || null, data_fim || null, local || null,
+            valor_com_transporte || null, valor_sem_transporte || null,
+            instagram || null, whatsapp_grupo || null,
+            typeof ativo === 'boolean' ? ativo : null,
+            typeof finalizado === 'boolean' ? finalizado : null,
+            cleanSlug, req.params.id
+        ]);
+        if (!rows.length) return err(res, 'Revisão não encontrada', 404);
+        ok(res, rows[0]);
+    } catch(e) { err(res, e.message, 500); }
+});
+
+// DELETE /api/revisoes/:id — só remove se NÃO houver inscrições
+app.delete('/api/revisoes/:id', async (req, res) => {
+    try {
+        const { rows: rev } = await q('SELECT codigo FROM revisoes WHERE id=$1', [req.params.id]);
+        if (!rev.length) return err(res, 'Revisão não encontrada', 404);
+        const codigo = rev[0].codigo;
+        const { rows: count } = await q(`SELECT COUNT(*)::int AS n FROM revisionistas WHERE revisao=$1`, [codigo]);
+        if (count[0].n > 0) {
+            return err(res, `Não pode remover: existem ${count[0].n} inscrição(ões) nesta revisão. Use 'finalizar' ou 'desativar'.`, 409);
+        }
+        await q('DELETE FROM revisoes WHERE id=$1', [req.params.id]);
+        ok(res, { ok: true });
+    } catch(e) { err(res, e.message, 500); }
+});
+
+
 // ─── CONFIG (RV ATIVA) ────────────────────────────────────────
 
 // GET /api/config  — retorna configuração atual
@@ -631,8 +769,9 @@ app.put('/api/config', async (req, res) => {
     try {
         const { rv_ativa, ano_ativo } = req.body;
         if (rv_ativa) {
-            const valid = ['RV1','RV2','RV3','RV4'];
-            if (!valid.includes(rv_ativa)) return err(res, 'Revisão inválida');
+            // Aceita qualquer código que exista na tabela revisoes
+            const { rows: exists } = await q("SELECT 1 FROM revisoes WHERE codigo=$1 LIMIT 1", [rv_ativa]);
+            if (!exists.length) return err(res, `Revisão inválida: código '${rv_ativa}' não existe na tabela revisoes`);
             await q("INSERT INTO config (chave, valor) VALUES ('rv_ativa',$1) ON CONFLICT (chave) DO UPDATE SET valor=$1, updated_at=NOW()", [rv_ativa]);
         }
         if (ano_ativo) {

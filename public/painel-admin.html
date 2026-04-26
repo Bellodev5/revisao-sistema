@@ -741,6 +741,9 @@
                 <div class="nav-item" id="nav-obreiros" onclick="showView('obreiros')">
                     <span class="ni"><i class="fas fa-hammer"></i></span> Obreiros
                 </div>
+                <div class="nav-item" id="nav-revisoes" onclick="showView('revisoes')">
+                    <span class="ni"><i class="fas fa-calendar-plus"></i></span> Revisões
+                </div>
                 <div class="nav-item" id="nav-site" onclick="showView('site')">
                     <span class="ni"><i class="fas fa-globe"></i></span> Site
                 </div>
@@ -932,6 +935,11 @@
                             <option value="apto">Apto</option>
                             <option value="inapto">Inapto</option>
                         </select>
+                        <select class="fsel-sm" id="obFiltroPag" onchange="renderObreiros()">
+                            <option value="all">Todos pagamentos</option>
+                            <option value="confirmado">Pagos</option>
+                            <option value="pendente">Pendentes</option>
+                        </select>
                     </div>
                 </div>
 
@@ -1032,6 +1040,117 @@
                 </div>
             </div>
 
+
+            <!-- ── REVISÕES (CRUD) ── -->
+            <div class="view" id="view-revisoes">
+                <div class="topbar">
+                    <div>
+                        <div class="pg-title"><i class="fas fa-calendar-plus"></i> Revisões</div>
+                        <div class="pg-sub">Crie, edite e gerencie as Revisões. Cada uma vira um link público <code style="background:rgba(26,143,196,.08);padding:1px 6px;border-radius:4px;font-size:.78rem;color:var(--accent2)">inscricaorv.saraitapema.com.br/&lt;slug&gt;</code></div>
+                    </div>
+                    <div class="topbar-right">
+                        <button class="btn-add" onclick="openRevisaoModal()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px">
+                            <i class="fas fa-plus"></i> Nova Revisão
+                        </button>
+                    </div>
+                </div>
+
+                <div class="view-sec">
+                    <div class="view-sec-head">
+                        <span><i class="fas fa-list"></i> Lista de Revisões</span>
+                    </div>
+                    <div id="revisoesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:1rem">
+                        <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">Carregando…</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── MODAL CRIAR/EDITAR REVISÃO ── -->
+            <div class="modal-ov2" id="revisaoModal" onclick="if(event.target===this)closeRevisaoModal()">
+                <div class="modal-box2" style="max-width:560px">
+                    <div class="modal-head">
+                        <span id="revisaoModalTitle" style="font-weight:600;color:#fff">Nova Revisão</span>
+                        <button onclick="closeRevisaoModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem"><i class="fas fa-xmark"></i></button>
+                    </div>
+                    <div class="modal-body" style="padding:1.2rem 1.4rem;display:flex;flex-direction:column;gap:.9rem;max-height:70vh;overflow-y:auto">
+                        <input type="hidden" id="revEditId">
+                        <div class="fg2">
+                            <label class="flbl2">Nome da revisão *</label>
+                            <input type="text" id="revNome" class="fi2" placeholder="Ex: Revisão de Vidas — Adultos / Revisão 100">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                            <div class="fg2">
+                                <label class="flbl2">Código único *</label>
+                                <input type="text" id="revCodigo" class="fi2" placeholder="Ex: RV1, RV100" maxlength="10" style="text-transform:uppercase">
+                            </div>
+                            <div class="fg2">
+                                <label class="flbl2">Slug (URL) *</label>
+                                <input type="text" id="revSlug" class="fi2" placeholder="rv100" maxlength="40" style="text-transform:lowercase">
+                            </div>
+                        </div>
+                        <div class="fg2">
+                            <label class="flbl2" style="display:flex;align-items:center;gap:6px"><i class="fas fa-link"></i> Link público</label>
+                            <div id="revLinkPreview" style="background:var(--bg2);padding:9px 12px;border-radius:6px;border:1px dashed var(--muted);font-size:.82rem;color:var(--accent2);font-family:monospace;word-break:break-all">https://inscricaorv.saraitapema.com.br/&lt;slug&gt;</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                            <div class="fg2">
+                                <label class="flbl2">Tipo</label>
+                                <select id="revTipo" class="fi2">
+                                    <option value="adultos">Adultos</option>
+                                    <option value="100">Revisão 100 (Jovens)</option>
+                                    <option value="kids">Kids</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="fg2">
+                                <label class="flbl2">Ano</label>
+                                <input type="number" id="revAno" class="fi2" min="2020" max="2099">
+                            </div>
+                        </div>
+                        <div class="fg2">
+                            <label class="flbl2">Subtítulo / descrição curta</label>
+                            <input type="text" id="revDescricao" class="fi2" placeholder="3 dias que vão transformar sua história para sempre">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                            <div class="fg2">
+                                <label class="flbl2">Data início</label>
+                                <input type="date" id="revDataInicio" class="fi2">
+                            </div>
+                            <div class="fg2">
+                                <label class="flbl2">Data fim</label>
+                                <input type="date" id="revDataFim" class="fi2">
+                            </div>
+                        </div>
+                        <div class="fg2">
+                            <label class="flbl2">Local</label>
+                            <input type="text" id="revLocal" class="fi2" placeholder="Chácara Nova Canaã">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                            <div class="fg2">
+                                <label class="flbl2">Valor com transporte (R$)</label>
+                                <input type="number" id="revValorCom" class="fi2" step="0.01" min="0" placeholder="320">
+                            </div>
+                            <div class="fg2">
+                                <label class="flbl2">Valor sem transporte (R$)</label>
+                                <input type="number" id="revValorSem" class="fi2" step="0.01" min="0" placeholder="300">
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:14px;padding:.4rem .2rem">
+                            <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;color:var(--text)">
+                                <input type="checkbox" id="revAtivo" checked style="cursor:pointer"> Aceitando inscrições
+                            </label>
+                            <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;color:var(--text)">
+                                <input type="checkbox" id="revFinalizado" style="cursor:pointer"> Finalizada
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-foot" style="padding:.9rem 1.4rem;display:flex;gap:.6rem;justify-content:flex-end;border-top:1px solid var(--border)">
+                        <button onclick="closeRevisaoModal()" style="background:transparent;border:1px solid var(--muted);color:var(--text);padding:8px 16px;border-radius:6px;cursor:pointer">Cancelar</button>
+                        <button id="revDelBtn" onclick="deleteRevisao()" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;padding:8px 16px;border-radius:6px;cursor:pointer;display:none"><i class="fas fa-trash"></i> Excluir</button>
+                        <button onclick="saveRevisao()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;padding:8px 18px;border-radius:6px;cursor:pointer;font-weight:600"><i class="fas fa-check"></i> Salvar</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ── SITE ── -->
             <div class="view" id="view-site">
@@ -1520,6 +1639,7 @@ function showView(v) {
     if (v === 'site')          renderSite();
     if (v === 'relatorios')    renderRelatorios();
     if (v === 'obreiros')      renderObreiros();
+    if (v === 'revisoes')      renderRevisoes();
     if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
 }
 function toggleSB() { document.getElementById('sidebar').classList.toggle('open'); }
@@ -1795,6 +1915,7 @@ function closeDetailModal() {
 async function renderObreiros() {
     const rv    = document.getElementById('obFiltroRV').value;
     const apto  = document.getElementById('obFiltroApto').value;
+    const pg    = document.getElementById('obFiltroPag')?.value || 'all';
     const srch  = (document.getElementById('obSrch')?.value || '').toLowerCase();
 
     try {
@@ -1803,6 +1924,7 @@ async function renderObreiros() {
         const r = await API.get(url);
         let lista = r;
         if (apto !== 'all') lista = lista.filter(o => o.apto === apto);
+        if (pg   !== 'all') lista = lista.filter(o => (o.pagamento || 'pendente') === pg);
         if (srch) lista = lista.filter(o => (o.nome_completo||'').toLowerCase().includes(srch));
 
         // stats
@@ -1811,12 +1933,16 @@ async function renderObreiros() {
         const inaptos  = lista.filter(o => o.apto === 'inapto').length;
         const pendentes= lista.filter(o => o.apto === 'pendente').length;
         const comFilho = lista.filter(o => o.vai_levar_filho === 'Sim').length;
+        const pagos    = lista.filter(o => o.pagamento === 'confirmado').length;
+        const naoPagos = total - pagos;
 
         document.getElementById('obStats').innerHTML = `
             <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(26,143,196,.12);color:#38bdf8"><i class="fas fa-hammer"></i></div></div><div class="scard-val">${total}</div><div class="scard-lbl">Total Inscritos</div></div>
             <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(34,197,94,.1);color:#22c55e"><i class="fas fa-circle-check"></i></div></div><div class="scard-val">${aptos}</div><div class="scard-lbl">Aptos</div></div>
             <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(234,179,8,.1);color:#eab308"><i class="fas fa-clock"></i></div></div><div class="scard-val">${pendentes}</div><div class="scard-lbl">Pendentes</div></div>
             <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(248,113,113,.1);color:#f87171"><i class="fas fa-xmark-circle"></i></div></div><div class="scard-val">${inaptos}</div><div class="scard-lbl">Inaptos</div></div>
+            <div class="scard clickable" onclick="document.getElementById('obFiltroPag').value='confirmado';renderObreiros()" style="cursor:pointer"><div class="scard-top"><div class="scard-ico" style="background:rgba(74,222,128,.1);color:#4ade80"><i class="fas fa-circle-dollar-to-slot"></i></div></div><div class="scard-val">${pagos}</div><div class="scard-lbl">Pagos</div></div>
+            <div class="scard clickable" onclick="document.getElementById('obFiltroPag').value='pendente';renderObreiros()" style="cursor:pointer"><div class="scard-top"><div class="scard-ico" style="background:rgba(234,179,8,.12);color:#facc15"><i class="fas fa-hourglass-half"></i></div></div><div class="scard-val">${naoPagos}</div><div class="scard-lbl">A pagar</div></div>
             <div class="scard"><div class="scard-top"><div class="scard-ico" style="background:rgba(251,146,60,.1);color:#fb923c"><i class="fas fa-child-reaching"></i></div></div><div class="scard-val">${comFilho}</div><div class="scard-lbl">Levam Filhos</div></div>
         `;
         document.getElementById('obSub').textContent = `${total} obreiro${total!==1?'s':''} encontrado${total!==1?'s':''}`;
@@ -2838,6 +2964,160 @@ function toast(msg, type='ok') {
 function getRV() {
     const m=new Date().getMonth()+1;
     return m<=3?'RV1':m<=6?'RV2':m<=9?'RV3':'RV4';
+}
+
+// ═══════════════════════════════════════════
+//   REVISÕES — CRUD
+// ═══════════════════════════════════════════
+let _REVISOES = [];
+
+async function renderRevisoes() {
+    const cont = document.getElementById('revisoesList');
+    if (!cont) return;
+    try {
+        const r = await API.get('/api/revisoes');
+        _REVISOES = (r.success ? r.data : r) || [];
+        if (!_REVISOES.length) {
+            cont.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">Nenhuma revisão cadastrada. <button onclick="openRevisaoModal()" style="background:var(--accent);border:none;color:#fff;padding:7px 14px;border-radius:6px;cursor:pointer;margin-left:8px"><i class="fas fa-plus"></i> Criar a primeira</button></div>`;
+            return;
+        }
+        cont.innerHTML = _REVISOES.map(rv => {
+            const link = `https://inscricaorv.saraitapema.com.br/${rv.slug || rv.codigo.toLowerCase()}`;
+            const datas = rv.data_inicio ? fmtDataRangePainel(rv.data_inicio, rv.data_fim) : '—';
+            const valor = rv.valor_com_transporte ? `R$ ${Number(rv.valor_com_transporte).toLocaleString('pt-BR')}` : '—';
+            const tipoLabel = { adultos:'Adultos', '100':'Revisão 100', kids:'Kids', outros:'Outros' }[rv.tipo] || rv.tipo || '—';
+            const statusBadge = rv.finalizado
+                ? '<span class="badge b-gray"><i class="fas fa-flag-checkered"></i> Finalizada</span>'
+                : (rv.ativo ? '<span class="badge b-green"><i class="fas fa-circle-check"></i> Aceitando</span>' : '<span class="badge b-yellow"><i class="fas fa-pause"></i> Pausada</span>');
+            return `
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;display:flex;flex-direction:column;gap:.6rem">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem">
+                        <div>
+                            <div style="font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">${tipoLabel} · ${rv.codigo}</div>
+                            <div style="font-size:1.05rem;font-weight:700;color:#fff;margin-top:2px">${rv.nome || rv.codigo}</div>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <div style="font-size:.78rem;color:var(--muted);line-height:1.6">
+                        <div><i class="fas fa-calendar-days" style="width:14px;color:var(--accent2)"></i> ${datas}</div>
+                        <div><i class="fas fa-location-dot" style="width:14px;color:var(--accent2)"></i> ${rv.local || '—'}</div>
+                        <div><i class="fas fa-wallet" style="width:14px;color:var(--accent2)"></i> ${valor} <span style="color:var(--muted2);font-size:.72rem">com transporte</span></div>
+                    </div>
+                    <div style="background:rgba(26,143,196,.06);border:1px dashed rgba(26,143,196,.25);border-radius:6px;padding:7px 10px;font-size:.74rem;color:var(--accent2);font-family:monospace;word-break:break-all;display:flex;align-items:center;gap:8px">
+                        <span style="flex:1">${link}</span>
+                        <button onclick="copyLink('${link.replace(/'/g, "\\'")}')" style="background:rgba(26,143,196,.15);border:none;color:var(--accent2);padding:4px 8px;border-radius:4px;cursor:pointer;font-size:.72rem"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div style="display:flex;gap:.4rem;margin-top:.3rem">
+                        <button onclick="openRevisaoModal(${rv.id})" style="flex:1;background:rgba(26,143,196,.1);border:1px solid rgba(26,143,196,.25);color:var(--accent2);padding:7px;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:500"><i class="fas fa-pen"></i> Editar</button>
+                        <a href="${link}" target="_blank" style="flex:1;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);color:#4ade80;padding:7px;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:500;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px"><i class="fas fa-arrow-up-right-from-square"></i> Abrir</a>
+                    </div>
+                </div>`;
+        }).join('');
+    } catch(e) {
+        cont.innerHTML = `<div style="grid-column:1/-1;color:#f87171">Erro: ${e.message}</div>`;
+    }
+}
+
+function fmtDataRangePainel(ini, fim) {
+    if (!ini) return '—';
+    const a = String(ini).slice(0,10).split('-');
+    if (a.length !== 3) return ini;
+    if (!fim) return `${parseInt(a[2])}/${parseInt(a[1])}/${a[0]}`;
+    const b = String(fim).slice(0,10).split('-');
+    if (a[0]===b[0] && a[1]===b[1]) return `${parseInt(a[2])}–${parseInt(b[2])}/${parseInt(a[1])}/${a[0]}`;
+    return `${parseInt(a[2])}/${parseInt(a[1])} a ${parseInt(b[2])}/${parseInt(b[1])}/${b[0]}`;
+}
+
+function copyLink(url) {
+    navigator.clipboard.writeText(url).then(() => toast('Link copiado!')).catch(() => toast('Falha ao copiar', 'warn'));
+}
+
+function openRevisaoModal(id) {
+    const rv = id ? _REVISOES.find(x => x.id === id) : null;
+    document.getElementById('revisaoModalTitle').textContent = rv ? `Editar ${rv.codigo}` : 'Nova Revisão';
+    document.getElementById('revEditId').value      = rv?.id || '';
+    document.getElementById('revNome').value        = rv?.nome || '';
+    document.getElementById('revCodigo').value      = rv?.codigo || '';
+    document.getElementById('revSlug').value        = rv?.slug || (rv ? rv.codigo.toLowerCase() : '');
+    document.getElementById('revTipo').value        = rv?.tipo || 'adultos';
+    document.getElementById('revAno').value         = rv?.ano || new Date().getFullYear();
+    document.getElementById('revDescricao').value   = rv?.descricao || '';
+    document.getElementById('revDataInicio').value  = rv?.data_inicio ? String(rv.data_inicio).slice(0,10) : '';
+    document.getElementById('revDataFim').value     = rv?.data_fim    ? String(rv.data_fim).slice(0,10)    : '';
+    document.getElementById('revLocal').value       = rv?.local || '';
+    document.getElementById('revValorCom').value    = rv?.valor_com_transporte ?? '';
+    document.getElementById('revValorSem').value    = rv?.valor_sem_transporte ?? '';
+    document.getElementById('revAtivo').checked     = rv ? !!rv.ativo : true;
+    document.getElementById('revFinalizado').checked= rv ? !!rv.finalizado : false;
+    // bloqueia código quando edita (FK em revisionistas.revisao)
+    document.getElementById('revCodigo').disabled = !!rv;
+    document.getElementById('revDelBtn').style.display = rv ? 'inline-flex' : 'none';
+    updateRevLinkPreview();
+    document.getElementById('revisaoModal').classList.add('open');
+}
+function closeRevisaoModal() { document.getElementById('revisaoModal').classList.remove('open'); }
+
+function updateRevLinkPreview() {
+    const slug = (document.getElementById('revSlug').value || '<slug>').toLowerCase().replace(/[^a-z0-9-]/g,'');
+    document.getElementById('revLinkPreview').textContent = `https://inscricaorv.saraitapema.com.br/${slug}`;
+}
+['revSlug','revCodigo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => {
+        if (id === 'revCodigo' && !document.getElementById('revEditId').value && !document.getElementById('revSlug').value.trim()) {
+            document.getElementById('revSlug').value = el.value.toLowerCase().replace(/[^a-z0-9-]/g,'');
+        }
+        updateRevLinkPreview();
+    });
+});
+
+async function saveRevisao() {
+    const id = document.getElementById('revEditId').value;
+    const payload = {
+        nome:                  document.getElementById('revNome').value.trim(),
+        codigo:                document.getElementById('revCodigo').value.trim().toUpperCase(),
+        slug:                  document.getElementById('revSlug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,''),
+        tipo:                  document.getElementById('revTipo').value,
+        ano:                   parseInt(document.getElementById('revAno').value) || new Date().getFullYear(),
+        descricao:             document.getElementById('revDescricao').value.trim() || null,
+        data_inicio:           document.getElementById('revDataInicio').value || null,
+        data_fim:              document.getElementById('revDataFim').value || null,
+        local:                 document.getElementById('revLocal').value.trim() || null,
+        valor_com_transporte:  document.getElementById('revValorCom').value || null,
+        valor_sem_transporte:  document.getElementById('revValorSem').value || null,
+        ativo:                 document.getElementById('revAtivo').checked,
+        finalizado:            document.getElementById('revFinalizado').checked,
+    };
+    if (!payload.nome || !payload.codigo || !payload.slug) {
+        toast('Nome, código e slug são obrigatórios', 'warn'); return;
+    }
+    try {
+        if (id) {
+            await API.patch(`/api/revisoes/${id}`, payload);
+            toast('Revisão atualizada');
+        } else {
+            await API.post('/api/revisoes', payload);
+            toast('Revisão criada!');
+        }
+        closeRevisaoModal();
+        renderRevisoes();
+    } catch(e) {
+        toast(e.message || 'Erro ao salvar', 'warn');
+    }
+}
+
+async function deleteRevisao() {
+    const id = document.getElementById('revEditId').value;
+    if (!id) return;
+    if (!confirm('Excluir esta revisão? (só funciona se NÃO houver inscrições nela)')) return;
+    try {
+        await API.delete(`/api/revisoes/${id}`);
+        closeRevisaoModal();
+        renderRevisoes();
+        toast('Revisão excluída');
+    } catch(e) {
+        toast(e.message || 'Erro ao excluir', 'warn');
+    }
 }
 </script>
 <div style="position:fixed;bottom:6px;right:14px;font-size:10px;color:var(--muted2);letter-spacing:.05em;opacity:.55;pointer-events:none;z-index:5">
