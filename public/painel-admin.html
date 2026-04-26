@@ -1121,6 +1121,15 @@
                                 <input type="number" id="revValorSem" class="fi2" step="0.01" min="0" placeholder="300">
                             </div>
                         </div>
+                        <div class="fg2">
+                            <label class="flbl2" style="display:flex;align-items:center;gap:6px"><i class="fab fa-whatsapp" style="color:#22c55e"></i> Link do grupo WhatsApp</label>
+                            <input type="url" id="revWhatsapp" class="fi2" placeholder="https://chat.whatsapp.com/...">
+                            <div style="font-size:.7rem;color:var(--muted);margin-top:4px"><i class="fas fa-circle-info" style="margin-right:4px"></i>Aparece no botão "Entrar no Grupo" do site público desta revisão. Deixe vazio para esconder a seção.</div>
+                        </div>
+                        <div class="fg2">
+                            <label class="flbl2" style="display:flex;align-items:center;gap:6px"><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram (opcional)</label>
+                            <input type="url" id="revInstagram" class="fi2" placeholder="https://www.instagram.com/...">
+                        </div>
                         <div style="display:flex;align-items:center;gap:14px;padding:.4rem .2rem">
                             <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;color:var(--text)">
                                 <input type="checkbox" id="revAtivo" checked style="cursor:pointer"> Aceitando inscrições
@@ -3065,11 +3074,13 @@ function openRevisaoModal(id) {
     document.getElementById('revLocal').value       = rv?.local || '';
     document.getElementById('revValorCom').value    = rv?.valor_com_transporte ?? '';
     document.getElementById('revValorSem').value    = rv?.valor_sem_transporte ?? '';
+    document.getElementById('revWhatsapp').value    = rv?.whatsapp_grupo || '';
+    document.getElementById('revInstagram').value   = rv?.instagram || '';
     document.getElementById('revAtivo').checked     = rv ? !!rv.ativo : true;
     document.getElementById('revFinalizado').checked= rv ? !!rv.finalizado : false;
 
     // Trava todos os campos editáveis se concluída (modo só-leitura)
-    const inputs = ['revNome','revSlug','revTipo','revAno','revDescricao','revDataInicio','revDataFim','revLocal','revValorCom','revValorSem','revAtivo','revFinalizado'];
+    const inputs = ['revNome','revSlug','revTipo','revAno','revDescricao','revDataInicio','revDataFim','revLocal','revValorCom','revValorSem','revWhatsapp','revInstagram','revAtivo','revFinalizado'];
     inputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.disabled = concluida;
@@ -3147,6 +3158,8 @@ async function saveRevisao() {
         local:                 document.getElementById('revLocal').value.trim() || null,
         valor_com_transporte:  document.getElementById('revValorCom').value || null,
         valor_sem_transporte:  document.getElementById('revValorSem').value || null,
+        whatsapp_grupo:        document.getElementById('revWhatsapp').value.trim() || null,
+        instagram:             document.getElementById('revInstagram').value.trim() || null,
         ativo:                 document.getElementById('revAtivo').checked,
         finalizado:            document.getElementById('revFinalizado').checked,
     };

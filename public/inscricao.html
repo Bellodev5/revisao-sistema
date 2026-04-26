@@ -425,7 +425,7 @@
         <div class="wa-icon"><i class="fab fa-whatsapp"></i></div>
         <h3 style="font-family:'Cinzel',serif;font-size:1.15rem;color:#fff;margin-bottom:.6rem">Grupo Oficial</h3>
         <p style="color:var(--muted);font-size:.87rem">Receba todas as informações importantes sobre o retiro em primeira mão.</p>
-        <a href="https://chat.whatsapp.com/HPb6hdxMk7i0yRl8UzLJ7v" target="_blank" rel="noopener" class="wa-btn">
+        <a href="https://chat.whatsapp.com/HPb6hdxMk7i0yRl8UzLJ7v" target="_blank" rel="noopener" class="wa-btn" id="rvWaBtn">
             <i class="fab fa-whatsapp"></i> Entrar no Grupo
         </a>
     </div>
@@ -839,6 +839,17 @@ function renderRV(rv) {
         pricesEl.innerHTML =
             `<div class="ppill"><strong>R$ ${com}</strong>com transporte</div>` +
             `<div class="ppill"><strong>R$ ${sem}</strong>sem transporte</div>`;
+    }
+    // Botão grupo WhatsApp dinâmico — esconde se RV não tem link
+    const waBtn = document.getElementById('rvWaBtn');
+    const waSec = document.querySelector('.wa-sec');
+    if (waBtn) {
+        if (rv.whatsapp_grupo) {
+            waBtn.href = rv.whatsapp_grupo;
+            if (waSec) waSec.style.display = '';
+        } else if (waSec) {
+            waSec.style.display = 'none';
+        }
     }
 }
 
