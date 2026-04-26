@@ -650,12 +650,15 @@ app.get('/api/revisoes', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-// GET /api/revisoes/ativa — a Revisão GERAL atual (mais recente não-finalizada com tipo=geral)
-// Fallback: rv_ativa configurada → mais recente não-finalizada de qualquer tipo → mais recente em geral
+// GET /api/revisoes/ativa — a Revisão GERAL atual (raiz do site, sem slug)
+// Estratégia:
+//   1. tipo=geral E não-finalizada → retorna ela
+//   2. tipo=geral mais recente (mesmo finalizada) → retorna com inscricoes_encerradas
+//   3. Sem nenhuma geral → 404
 app.get('/api/revisoes/ativa', async (req, res) => {
     try {
         await ensureSchema();
-        // 1. Geral não-finalizada mais recente
+        // 1. Geral ativa
         let { rows } = await q(`
             SELECT * FROM revisoes
              WHERE tipo='geral' AND finalizado=FALSE
@@ -664,21 +667,16 @@ app.get('/api/revisoes/ativa', async (req, res) => {
         `);
         if (rows.length) return ok(res, rows[0]);
 
-        // 2. Fallback: rv_ativa configurada manualmente
-        const { rows: cfg } = await q("SELECT valor FROM config WHERE chave='rv_ativa'");
-        if (cfg[0]?.valor) {
-            const { rows: r2 } = await q(`SELECT * FROM revisoes WHERE codigo=$1 LIMIT 1`, [cfg[0].valor]);
-            if (r2.length) return ok(res, r2[0]);
-        }
-
-        // 3. Última criada qualquer
+        // 2. Última geral mesmo finalizada (mostra "encerradas" no front)
         ({ rows } = await q(`
             SELECT * FROM revisoes
-             ORDER BY finalizado ASC, ano DESC NULLS LAST, created_at DESC
+             WHERE tipo='geral'
+             ORDER BY ano DESC NULLS LAST, created_at DESC
              LIMIT 1
         `));
-        if (rows.length) return ok(res, rows[0]);
-        err(res, 'Nenhuma revisão cadastrada', 404);
+        if (rows.length) return ok(res, { ...rows[0], inscricoes_encerradas: true });
+
+        return err(res, 'Nenhuma Revisão geral cadastrada', 404);
     } catch(e) { err(res, e.message, 500); }
 });
 
