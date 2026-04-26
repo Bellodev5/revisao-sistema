@@ -775,15 +775,14 @@ function renderRV(rv) {
 
     if (titleEl) {
         const ano = rv.ano || new Date().getFullYear();
-        const nome = rv.nome || 'Revisão de Vidas';
-        // se nome contém número (ex: "Revisão 100"), usar tal qual
-        if (/\d/.test(nome)) {
-            const partes = nome.split(' ');
-            const ult = partes.pop();
-            titleEl.innerHTML = `${partes.join(' ')}<br><span>${ult} ${ano}</span>`;
-        } else {
-            titleEl.innerHTML = `${nome.split(' ')[0]}<br>de <span>${nome.split(' ').slice(1).join(' ') || 'Vidas'} ${ano}</span>`;
-        }
+        const nome = (rv.nome || 'Revisão de Vidas').trim();
+        // Última palavra do nome vai pro <span> colorido + ano
+        const palavras = nome.split(/\s+/);
+        const ult = palavras.pop();
+        const resto = palavras.join(' ');
+        titleEl.innerHTML = resto
+            ? `${resto}<br><span>${ult} ${ano}</span>`
+            : `<span>${ult} ${ano}</span>`;
     }
     if (subEl && rv.descricao)        subEl.textContent   = rv.descricao;
     if (datasEl)                      datasEl.textContent = fmtDataRange(rv.data_inicio, rv.data_fim);
