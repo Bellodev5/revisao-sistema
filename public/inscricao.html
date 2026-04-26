@@ -773,6 +773,37 @@ function fmtMoney(v) {
     return n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
+function renderEncerrada(rv) {
+    document.title = (rv.nome || 'Revisão') + ' — Inscrições encerradas';
+    const palavras = (rv.nome || 'Revisão').trim().split(/\s+/);
+    const ult = palavras.pop();
+    const resto = palavras.join(' ');
+    const titleEl = document.getElementById('rvTitle');
+    if (titleEl) titleEl.innerHTML = resto
+        ? `${resto}<br><span>${ult} ${rv.ano || ''}</span>`
+        : `<span>${ult} ${rv.ano || ''}</span>`;
+    const sub = document.getElementById('rvSub');
+    if (sub) sub.textContent = 'Esta edição já aconteceu — fique de olho na próxima!';
+
+    // Banner grande
+    const banner = document.createElement('div');
+    banner.style.cssText = 'max-width:760px;margin:2.5rem auto 0;padding:1.6rem 1.5rem;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35);border-radius:16px;text-align:center;color:#fcd34d;font-family:Inter,sans-serif;position:relative;z-index:5';
+    banner.innerHTML = `
+        <i class="fas fa-flag-checkered" style="font-size:1.6rem;margin-bottom:.6rem;display:block"></i>
+        <div style="font-family:Cinzel,serif;font-size:1.2rem;color:#fff;margin-bottom:.4rem">Inscrições encerradas</div>
+        <div style="font-size:.86rem;line-height:1.6;color:rgba(252,211,121,.8)">A inscrição para <strong>${rv.nome || 'esta revisão'}</strong>${rv.ano ? ` ${rv.ano}` : ''} já foi encerrada.<br>Quando abrir a próxima edição, ela aparecerá automaticamente neste mesmo link.</div>
+        <a href="https://www.instagram.com/sara.itapema/" target="_blank" style="display:inline-flex;align-items:center;gap:7px;margin-top:1.2rem;padding:9px 22px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:100px;color:#fcd34d;text-decoration:none;font-size:.84rem;font-weight:500"><i class="fab fa-instagram"></i> Acompanhe no Instagram</a>
+    `;
+    const hero = document.querySelector('.hero');
+    if (hero) hero.appendChild(banner);
+
+    // Esconde tudo abaixo do hero
+    document.querySelectorAll('section, .div').forEach(el => {
+        if (!el.classList.contains('hero')) el.style.display = 'none';
+    });
+    // Esconde footer também? Não — mantém footer e modal de confirmação fica oculto
+}
+
 function renderRV(rv) {
     if (!rv) return;
     const titleEl = document.getElementById('rvTitle');
@@ -781,6 +812,12 @@ function renderRV(rv) {
     const localEl = document.getElementById('rvLocal');
     const pricesEl= document.getElementById('rvPrices');
     document.title = (rv.nome || 'Revisão') + ' — Sara Itapema';
+
+    // Inscrições encerradas (finalizado=true ou flag do backend)
+    if (rv.finalizado === true || rv.inscricoes_encerradas === true) {
+        renderEncerrada(rv);
+        return;
+    }
 
     if (titleEl) {
         const ano = rv.ano || new Date().getFullYear();

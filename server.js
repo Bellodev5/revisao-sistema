@@ -658,18 +658,39 @@ app.get('/api/revisoes/ativa', async (req, res) => {
     } catch(e) { err(res, e.message, 500); }
 });
 
-// GET /api/revisoes/:slug — busca por slug (para link público /rv100)
+// GET /api/revisoes/:slug — busca a "atual" do slug
+// Lógica: prioriza não-finalizada e ano mais recente.
+// Se só finalizadas existem, retorna a mais recente com flag inscricoes_encerradas=true.
 app.get('/api/revisoes/:slug', async (req, res) => {
     try {
         await ensureSchema();
         const { slug } = req.params;
-        const { rows } = await q(`SELECT * FROM revisoes WHERE slug=$1 OR LOWER(codigo)=LOWER($1) LIMIT 1`, [slug]);
+        const { rows } = await q(`
+            SELECT * FROM revisoes
+             WHERE slug = $1 OR LOWER(codigo) = LOWER($1)
+             ORDER BY finalizado ASC, ano DESC NULLS LAST, created_at DESC
+             LIMIT 1
+        `, [slug]);
         if (!rows.length) return err(res, 'Revisão não encontrada', 404);
-        ok(res, rows[0]);
+        const rv = rows[0];
+        // Se existe alguma ativa pro mesmo slug, sempre retorna ela (filtrar de novo)
+        if (rv.finalizado) {
+            const { rows: ativa } = await q(`
+                SELECT * FROM revisoes
+                 WHERE slug = $1 AND finalizado = FALSE
+                 ORDER BY ano DESC NULLS LAST, created_at DESC
+                 LIMIT 1
+            `, [slug]);
+            if (ativa.length) return ok(res, ativa[0]);
+            // Só finalizadas — devolve mas marca encerrada
+            return ok(res, { ...rv, inscricoes_encerradas: true });
+        }
+        ok(res, rv);
     } catch(e) { err(res, e.message, 500); }
 });
 
 // POST /api/revisoes — cria nova
+// finalizar_anterior=true → marca anteriores não-finalizadas de mesmo slug como finalizado=true
 app.post('/api/revisoes', async (req, res) => {
     try {
         await ensureSchema();
@@ -677,14 +698,32 @@ app.post('/api/revisoes', async (req, res) => {
             codigo, slug, nome, descricao, ano, tipo,
             data_inicio, data_fim, local,
             valor_com_transporte, valor_sem_transporte,
-            instagram, whatsapp_grupo, ativo
+            instagram, whatsapp_grupo, ativo,
+            finalizar_anterior
         } = req.body;
         if (!codigo || !slug || !nome) return err(res, 'codigo, slug e nome são obrigatórios');
         const cleanSlug = String(slug).trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
         if (!cleanSlug) return err(res, 'slug inválido');
-        // Garante que slug e codigo são únicos
-        const { rows: dup } = await q(`SELECT id FROM revisoes WHERE codigo=$1 OR slug=$2`, [codigo, cleanSlug]);
-        if (dup.length) return err(res, 'Já existe revisão com esse código ou slug', 409);
+
+        // Código deve ser único
+        const { rows: dupCodigo } = await q(`SELECT id FROM revisoes WHERE codigo=$1`, [codigo]);
+        if (dupCodigo.length) return err(res, `Código '${codigo}' já existe`, 409);
+
+        // Slug duplicado: precisa explicitar finalizar_anterior
+        const { rows: dupSlug } = await q(`SELECT id, codigo, finalizado FROM revisoes WHERE slug=$1`, [cleanSlug]);
+        const ativasComMesmoSlug = dupSlug.filter(r => !r.finalizado);
+        if (ativasComMesmoSlug.length && !finalizar_anterior) {
+            return res.status(409).json({
+                success: false,
+                error: 'slug em uso por revisão ativa',
+                ativas: ativasComMesmoSlug,
+                hint: 'envie finalizar_anterior:true para arquivar a(s) anterior(es)'
+            });
+        }
+        if (finalizar_anterior && ativasComMesmoSlug.length) {
+            await q(`UPDATE revisoes SET finalizado=TRUE WHERE slug=$1 AND finalizado=FALSE`, [cleanSlug]);
+        }
+
         const anoFinal = parseInt(ano) || new Date().getFullYear();
         const { rows } = await q(`
             INSERT INTO revisoes (
@@ -701,7 +740,7 @@ app.post('/api/revisoes', async (req, res) => {
             instagram || null, whatsapp_grupo || null,
             ativo === false ? false : true
         ]);
-        ok(res, rows[0]);
+        ok(res, { ...rows[0], finalizadas_anteriores: ativasComMesmoSlug.length });
     } catch(e) { err(res, e.message, 500); }
 });
 

@@ -3097,8 +3097,21 @@ async function saveRevisao() {
             await API.patch(`/api/revisoes/${id}`, payload);
             toast('Revisão atualizada');
         } else {
-            await API.post('/api/revisoes', payload);
-            toast('Revisão criada!');
+            try {
+                await API.post('/api/revisoes', payload);
+                toast('Revisão criada!');
+            } catch(postErr) {
+                // Slug duplicado: oferece finalizar a anterior
+                const ativasJaExistentes = _REVISOES.filter(r => r.slug === payload.slug && !r.finalizado);
+                if (ativasJaExistentes.length && /slug em uso|409/.test(postErr.message || '')) {
+                    const nomes = ativasJaExistentes.map(r => `${r.nome || r.codigo}`).join(', ');
+                    if (!confirm(`Já existe uma revisão ativa com o link /${payload.slug}: ${nomes}.\n\nQuer FINALIZAR a anterior e ativar a nova? (os inscritos antigos continuam visíveis no painel)`)) return;
+                    await API.post('/api/revisoes', { ...payload, finalizar_anterior: true });
+                    toast('Revisão criada! Anterior finalizada.');
+                } else {
+                    throw postErr;
+                }
+            }
         }
         closeRevisaoModal();
         renderRevisoes();
